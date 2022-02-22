@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style>
+            html{
+                font-family: Arial, Helvetica, sans-serif;
+                background-color: cornflowerblue;
+            }
+            
+            header{
+                font-size: 50px;
+                font-weight: bold;
+                text-align: center;
+                padding-bottom: 15mm;
+            }
+
+            article{
+                margin-right: auto;
+                margin-left: auto;
+                width: 50%;
+                padding: 15mm;
+                border-radius: 5mm;
+                border: 5px solid blue;
+                background-color: white;
+            }
+
+            div.tasto{
+                padding-top: 2mm;
+                width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+        </style>
+
+
+        <title>
+            Manuale
+        </title>
+    </head>
+
+    <body>
+        <header>
+            Manuale
+        </header>
+
+        <article>
+
+            <section>
+                <h4>Finalita webapp</h4>
+                Questa webapp utilizza la logica di Lukasiewicz per diversi scopi
+            </section>
+
+            <section>
+                <h4>Modalita disponibili</h4>
+                L'app ha 4 modalità attualmente disponibili:
+                <ol>
+                    <li>
+                        Soddisfacibilità: data una formula di Lukasiewicz, permette di scoprire se questa è
+                        soddisfacibile oppure no, dandone, nel caso, anche un esempio. Vi è inoltre anche
+                        la possibiltà di verificare se esistono ulteriori soluzioni oltre a quella trovata
+                        in precedenza, in un numero deciso dall'utente
+                    </li>
+
+                    <li>
+                        Conseguenza logica: dato un insieme di formule e un'ulteriore formula di Lukasiewicz,
+                        verifica se l'ultima è conseguenza logica delle altre. Supporta anche il caso con insieme
+                        vuoto di formule
+                    </li>
+
+                    <li>
+                        Ragionamento vago da input: l'app, con una tabella data in input dall'utente, codifica
+                        la tabella normalizzata attraverso un insieme di formule di Lukasiewicz.
+                        Fatto ciò, a seconda della scelta dell'utente, può verificare se gli ottetti
+                        verificano o no quella query, o calcolare semplicemento quanto si avvicinano a verificare
+                        (il valore 1 indiche la condizione è stata verificata) <br />
+                        In questa modalità è previsto anche l'uso delle parole chiave "molto" e "poco".
+                        Il funzionamento di queste parole chiave è spiegato come segue: <br />
+                        MOLTO: <br />
+                        molto a: equivalente ad imporre a maggiore o uguale ad 1/2 <br />
+                        molto molto a: equivalente ad imporre a maggiore o uguale ad 2/3 <br />
+                        e cosi via <br />
+                        POCO: <br />
+                        poco a: equivalente ad imporre a minore o uguale ad 1/2 <br />
+                        poco poco a: equivalente ad imporre a minore o uguale ad 1/3 <br />
+                        e cosi via
+
+                    </li>
+
+                    <li>
+                        Ragionamento vago da database: come sopra, ma l'utente seleziona un file txt in formato CVD
+                        dove si trovano tutti i dati da analizzare
+                    </li>
+                </ol>
+            </section>
+
+            <section>
+                <h4>Simboli del linguaggio disponibili</h4>
+                Di seguito è riportata la lista di tutti i connettivi che è possibile usare all'interno del risolutore (in ordine di priorità)
+            
+                <ol>
+                    <li>-p: negazione (valore di verità: 1-p) </li>
+                    <li>p&q: congiunzione forte (valore di verità: max{0, p+q-1}) </li>
+                    <li>p+q: disgiunzione forte (valore di verità: min{1, p+q}) </li>
+                    <li>p_q: differenza troncata (equivalente ad p&(-q)) </li>
+                    <li>p^q: congiunzione debole (valore di verità: min{p, q}) </li>
+                    <li>pUq: disgiunzione debole (valore di verità: max{p, q}) </li>
+                    <li>p>q: implicazione (valore di verità: min{1, 1-p+q}) </li>
+                    <li>p=q: doppia implicazione (equivalente ad (p>q)&(q>p)) </li>
+                </ol>
+                
+                Possibile è anche l'utilizzo delle costanti logiche 0 e 1 per indicare l'assurdo e la tautologia.
+                Inoltre, si è esteso il linguaggio aggiungendo la potenza e la moltiplicazione per un numero, definiti in questo modo:
+                <ol>
+                    <li>pPn: a&a&...&a n volte</li>
+                    <li>n*p: a+a+...+a n volte</li>
+                </ol>
+                La priorità di questi connettivi ausiliari è data dall'ordine della lista. Questi hanno anche priorità rispetto a
+                qualsiasi connettivo logico
+    
+            </section>
+            
+            <div class="tasto">
+                <form action="/">
+                    <input type="submit" value="Tornare alla pagina iniziale" />
+                </form>
+            </div>
+        
+        </article>
+
+
+    </body>
+</html>
