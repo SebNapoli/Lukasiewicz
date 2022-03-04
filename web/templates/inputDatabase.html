@@ -71,7 +71,7 @@
             {% elif ID=='NameError' %} 
             Errore! Alcuni dei parametri non sono corretti. Per favore, riprovare.
             {% elif ID=='PermissionError' %}
-            Errore! Trovati nella query parole chiavi contrastanti. Per favore, riprovare.
+            Errore! Nomi parametri non validi (presenza di segni sintattici). Per favore, riprovare.
             {% elif ID=='ArgumentError' %} 
             Errore! Input query errata. Per favore, riprovare.
             {% elif ID=='TypeError' %} 
@@ -93,10 +93,10 @@
                     <div class="input">
                         File: <input type="file" name="database" />
                     </div>
-    
+                    
+                    {% if query %}
                     <div class="input">
                         Inserire query: <input type="text" name="condizione" /> <br />
-                        Inserire livello precisione (inserire "inf" per calcolo esatto): 1/ <input type="text" name="den" />
                         <p>
                         Scegliere su cosa calcolare:
                         <ul>
@@ -105,6 +105,8 @@
                         </ul>
                         </p>
                     </div>
+                    {% endif %}
+                    Inserire livello precisione (inserire "inf" per calcolo esatto): 1/ <input type="text" name="den" />
 
                     <div class="tasto">
                         <input type="submit" value="Conferma">

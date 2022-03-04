@@ -18,19 +18,20 @@
                 padding-bottom: 15mm;
             }
 
-            div.debug{
-                font-size: 20px;
-                font-weight: 200;
-            }
 
             article{
                 margin-right: auto;
                 margin-left: auto;
-                width: 50%;
                 padding: 15mm;
                 border-radius: 5mm;
                 border: 5px solid blue;
                 background-color: white;
+                width: fit-content;
+            }
+            
+            #formula{
+                font-size: fit-content;
+                font-weight: 200;
             }
 
             div.tasto{
@@ -72,24 +73,30 @@
         </header>
 
         <article>
-            <div class="debug">
-                Formule usate per codificare tabella: <br />
+            <div>
+                <h4>Formule usate per codificare tabella: </h4> <br />
                 <ul>
-                {% for formula in formule %}
+                    <id=formula>
+                    {% for formula in formule %}
+                    </id>
                 <li> {{formula}}
                 </li>
 
                 {% endfor %}
                 </ul>
-
+                {% if decisione!=None %}
                 <p>Interpetrazione in formula di Lukasiewicz della query: <br />
+                    <id=formula>
                     {{decisione}}
+                    </id>
                 </p>
+                {% endif %}
             </div>
 
             <div class="esempi">
             </div>
-
+            
+            {% if output!=None %}
             <div class="output">
                 Si sono ottenuti i seguenti risultati:
                     <ol>
@@ -98,7 +105,8 @@
                     {% endfor %}
                     </ol>    
             </div>
-    
+            {% endif %}
+            
             <div class="tasto">
                 <form action="/">
                     <input type="submit" value="Tornare alla pagina iniziale" />
