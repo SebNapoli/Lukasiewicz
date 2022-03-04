@@ -6,7 +6,7 @@ from services.debug import debugFormula
 from services.scansioneIniziale import *
 from services.controlloRagionamento import *
 from services.modalitaRagionamento import *
-
+from services.linguaggioNaturale import *
 
 
 def costruzioneFormule(tabella, nome_var, confronti, rig, col, N): #costruzione delle formule che codificano le tabelle
@@ -28,51 +28,36 @@ def costruzioneFormule(tabella, nome_var, confronti, rig, col, N): #costruzione 
       elif num==0:
         insieme.append(nome_var[i][j]+'=0')
 
-      elif N=="inf":
+      else:
         div=MCD(den, num)
         den=int(den/div)
         num=int(num/div)
-        f1=Cformula(float(num/den), den, 1-num, nome_var[i][j])
-        f2=Cformula2(float(num/den), -den, 1+num, nome_var[i][j])
-        insieme.append('('+f1+')^('+f2+')')
+        if N=="inf":
+          f1=Cformula(float(num/den), den, 1-num, nome_var[i][j])
+          f2=Cformula2(float(num/den), -den, 1+num, nome_var[i][j])
+          insieme.append('('+f1+')^('+f2+')')
 
-      else:
-        N=int(N)
-        trovato=False
-        for k1 in range(N):
-          if k1!=0:
-            for k2 in range(k1):
-              if float(num/den)==float(k2/k1):
-                f1=Cformula(float(k2/k1), k1, 1-k2, nome_var[i][j])
-                f2=Cformula2(float(k2/k1), -k1, 1+k2, nome_var[i][j])
-                insieme.append('('+f1+')^('+f2+')')
-                trovato=True
-                break
-            
-          if trovato:
-            break
-        
-        if not(trovato):
+        else:
+          N=int(N)
+          if N>=den:
+            f1=Cformula(float(num/den), den, 1-num, nome_var[i][j])
+            f2=Cformula2(float(num/den), -den, 1+num, nome_var[i][j])
+            insieme.append('('+f1+')^('+f2+')')
           
-          for k in range(N):
-            if float(num/den)==float(k/N):
-              f1=Cformula(float(k/N), N, 1-k, nome_var[i][j])
-              f2=Cformula2(float(k/N), -N, 1+k, nome_var[i][j])
-              insieme.append('('+f1+')^('+f2+')')
-              break
+          else:  
+            for k in range(N):
+              if float(num/den)<float((k+1)/N):
+                if k==0:
+                  f1='1'
+                else:  
+                  f1=Cformula(float(k/N), N, 1-k, nome_var[i][j])
 
-            elif float(num/den)<float((k+1)/N):
-              if k==0:
-                f1='1'
-              else:  
-                f1=Cformula(float(k/N), N, 1-k, nome_var[i][j])
-
-              if k==(N-1):
-                f2='1'
-              else:
-                f2=Cformula2(float((k+1)/N), -N, 1+(k+1), nome_var[i][j])
-              insieme.append('('+f1+')^('+f2+')')
-              break
+                if k==(N-1):
+                  f2='1'
+                else:
+                  f2=Cformula2(float((k+1)/N), -N, 1+(k+1), nome_var[i][j])
+                insieme.append('('+f1+')^('+f2+')')
+                break
          
   return insieme
 
@@ -92,7 +77,7 @@ def Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modali
     for j in range(col):
       nome_var[i].append(proprieta[j]+str(i+1))
 
-  if ("molto " in decisione) or ("poco " in decisione):
+  if ("molto " in decisione) or ("abbastanza " in decisione):
     decisione=linguaggioNaturale(decisione)
   else:
     scansioneIniziale(decisione)

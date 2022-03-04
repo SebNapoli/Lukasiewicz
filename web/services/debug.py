@@ -37,9 +37,9 @@ def parsing(formula): #resituisce la formula con l'aggiunta delle parentesi in m
     for x in aus:
       while x in connettivi:
         i=connettivi.index(x) #trova la posizione del connettivo
-        stringa=sottoformule[i]
+        stringa=sottoformule[i+1]
         if stringa[0]=='-':
-          sottoformule[i]='-'+merge(x, sottoformule[i][1:], sottoformule[i+1]) #aggiungi parentesi per la sottoformula
+          sottoformule[i]=merge(x, sottoformule[i], '('+sottoformule[i+1]+')') #aggiungi parentesi per la sottoformula
         else:
           sottoformule[i]=merge(x, sottoformule[i], sottoformule[i+1])
         sottoformule[i+1]=''
@@ -57,14 +57,8 @@ def parsing(formula): #resituisce la formula con l'aggiunta delle parentesi in m
       return sottoformule[0] #resituisce la formula originaria
 
   for i in range(len(sottoformule)): #fa il parsing su tutte le sottoformule
+    sottoformule[i]=parsing(sottoformule[i])
 
-    if ('*' in sottoformule[i]) or ('P' in sottoformule[i]):
-      stringa='('+parsing(sottoformule[i])+')'
-      
-    else:
-      stringa=parsing(sottoformule[i])
-
-    sottoformule[i]=stringa
 
   sottoformule=elaborazione(conn, connettivi, sottoformule)
 
@@ -79,18 +73,12 @@ def trasformazione(formula):
 
   while 'P' in formula:
     ind=formula.index('P')
-    i=ind-1
+    i=aperturaParentesi(formula, ind)
+    j=trovaParentesi(formula, ind)
 
-    while i>0:
-      if formula[i]=='(':
-        break
-      else:
-        i-=1
-    
-    j=trovaParentesi(formula, i+1)
     argomento=formula[i+1:ind]
-    esponente=formula[ind+1:j]
-    
+    esponente=int(formula[ind+1:j])
+
     for k in range(int(esponente)):
       if k==0:
         formulaAusiliaria=argomento
@@ -101,15 +89,9 @@ def trasformazione(formula):
   
   while '*' in formula:
     ind=formula.index('*')
-    i=ind-1
-    
-    while i>0:
-      if formula[i]=='(':
-        break
-      else:
-        i-=1
-    
-    j=trovaParentesi(formula, i)
+    i=aperturaParentesi(formula, ind)
+    j=trovaParentesi(formula, ind)
+
     fattore=int(formula[i+1:ind])
     argomento=formula[ind+1:j]
 

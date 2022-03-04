@@ -15,14 +15,16 @@ def controllo_variabili(stringa, connettivi, sottoformule, i):
 
         if len(sottoformule)==1 and condizione: #se la stringa è conposta da un solo carattere numerico e non è una costante logica
             raise SyntaxError
-        elif i==0 and connettivi[0]!='*' and condizione: #se si trova all'inizio della formula e non è seguito da un segno di moltiplicazione
+        elif i==0:
+            if connettivi[0]!='*' and condizione: #se si trova all'inizio della formula e non è seguito da un segno di moltiplicazione
+                raise SyntaxError
+        elif i==(len(sottoformule)-1):
+            if connettivi[i-1]!='P' and condizione: #se si trova alla fine è non è preceduto da un simbolo di potenza
+                raise SyntaxError
+        elif connettivi[i-1]!='P' and connettivi[i]!='*' and condizione: #se è un numero diverso da 0 e 1 
+            #se questa condizione è rispettata allora sarebbe una variabile
             raise SyntaxError
-        elif i==(len(sottoformule)-1) and connettivi[i-1]!='P' and condizione: #se si trova alla fine è non è preceduto da un simbolo di potenza
-            raise SyntaxError
-        elif condizione: #se è un numero diverso da 0 e 1 
-            if connettivi[i-1]!='P' and connettivi[i]!='*': #se questa condizione è rispettata allora sarebbe una variabile
-                raise SyntaxError            
-        if connettivi[i-1]=='P' and connettivi[i]=='*': #una formula di questo dipo non ha senso
+        elif connettivi[i-1]=='P' and connettivi[i]=='*': #una formula di questo dipo non ha senso
             raise SyntaxError
 
     elif stringa.isalpha(): #se è una stinga letterale
@@ -93,4 +95,4 @@ def scansioneIniziale(formula): #controlla, prima di qualsiasi operazione, se la
         
         #errore se si trovano simboli non validi
         elif simboli_invalidi:
-            raise IOError
+            raise NotImplementedError
