@@ -37,8 +37,11 @@ def scelta_modalità():
       elif scelta=='3':
         return render_template("inputDimensioni.html", errore=False)
 
-      else:
-        return render_template("inputDatabase.html", errore=False, ID=None)
+      elif scelta=='4':
+        return render_template("inputDatabase.html", errore=False, ID=None, query=True)
+
+      elif scelta=='5':
+        return render_template("inputDatabase.html", errore=False, ID=None, query=False)
     
     except: #se non è stata selezionata nessuna opzione
       return render_template("pagina iniziale.html")
@@ -92,7 +95,7 @@ def singolaFormula():
 
       #gestione errori della sintassi
         
-    except IOError:
+    except NotImplementedError:
       return render_template("inputSoddisfacibilità.html", errore=True, ID='IOError')
     except IndentationError:
       return render_template("inputSoddisfacibilità.html", errore=True, ID='IndentationError')
@@ -198,7 +201,7 @@ def ConseguenzaLogica():
             risultato="La formula non è conseguenza logica."
             return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula, risultato=risultato, controesempio=None)          
 
-    except IOError:
+    except NotImplementedError:
       return render_template("inputConseguenza.html", errore=True, ID='IOError')
     except IndentationError:
       return render_template("inputConseguenza.html", errore=True, ID='IndentationError')
@@ -281,7 +284,7 @@ def Ragionamento_Vago():
 
       [formule, decisione, output]=Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modalita)
 
-      return render_template("outputRagionamento.html", formule=formule, output=output)
+      return render_template("outputRagionamento.html", formule=formule, decisione=decisione, output=output)
     
     #gestione di tutti i possibili errori
     except NameError:
@@ -292,7 +295,7 @@ def Ragionamento_Vago():
       return render_template("inputTabella.html", errore=True, ID="ArgumentError", rig=rig+1, col=col)
     except TypeError:
       return render_template("inputTabella.html", errore=True, ID="TypeError", rig=rig+1, col=col)
-    except IOError:
+    except NotImplementedError:
       return render_template("inputTabella.html", errore=True, ID='IOError', rig=rig+1, col=col)
     except IndentationError:
       return render_template("inputTabella.html", errore=True, ID='IndentationError', rig=rig+1, col=col)
@@ -312,6 +315,11 @@ def database():
       return "<p> ERRORE </p>"
     
   if request.method=="POST":
+    if "condizione" in list(request.form):
+      query=True
+    else:
+      query=False
+
     try:
       with open(request.form["database"]) as f: #apertura database
         oggetti=[]
@@ -338,35 +346,48 @@ def database():
         for j in range(col):
           confronti.append("max")
 
-        decisione=request.form["condizione"]
-        den=request.form["den"]
-        modalita=request.form["modalita"]
-        
         for i in range(rig):
           for j in range(col):
             tabella[i][j]=int(tabella[i][j])
 
-        #chiamata della funzione principale del ragionamento
-        [formule, decisione, output]=Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modalita)
+        den=request.form["den"]
+
+        if query:
+          decisione=request.form["condizione"]
+          modalita=request.form["modalita"]
+          #chiamata della funzione principale del ragionamento
+          [formule, decisione, output]=Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modalita)
+
+        else:
+          nome_var=[]
+          controlloProprietà(proprieta, oggetti, rig, col)
+          #crea il nome di tutte le varibili logiche, definite come nome proprietà più il codice dell'oggetto
+          for i in range(rig):
+            nome_var.append([])
+            for j in range(col):
+              nome_var[i].append(proprieta[j]+str(i+1))
+
+          formule=costruzioneFormule(tabella, nome_var, confronti, rig, col, den)
+          decisione=output=None
 
         return render_template("outputRagionamento.html", formule=formule, decisione=decisione, output=output)
         
     #gestione di tutti i possibili errori
     except NameError:
-      return render_template("inputDatabase.html", errore=True, ID="NameError")
+      return render_template("inputDatabase.html", errore=True, ID="NameError", query=query)
     except PermissionError:
-      return render_template("inputDatabase.html", errore=True, ID="PermissionError")
+      return render_template("inputDatabase.html", errore=True, ID="PermissionError", query=query)
     except ArgumentError:
-      return render_template("inputDatabase.html", errore=True, ID="ArgumentError")
+      return render_template("inputDatabase.html", errore=True, ID="ArgumentError", query=query)
     except TypeError:
-      return render_template("inputDatabase.html", errore=True, ID="TypeError")
-    except IOError:
-      return render_template("inputDatabase.html", errore=True, ID='IOError')
+      return render_template("inputDatabase.html", errore=True, ID="TypeError", query=query)
+    except NotImplementedError:
+      return render_template("inputDatabase.html", errore=True, ID='IOError', query=query)
     except IndentationError:
-      return render_template("inputDatabase.html", errore=True, ID='IndentationError')
+      return render_template("inputDatabase.html", errore=True, ID='IndentationError', query=query)
     except SyntaxError:
-      return render_template("inputDatabase.html", errore=True, ID='SyntaxError')
+      return render_template("inputDatabase.html", errore=True, ID='SyntaxError', query=query)
     except ImportError:
-      return render_template("inputDatabase.html", errore=True, ID='ImportError')      
+      return render_template("inputDatabase.html", errore=True, ID='ImportError', query=query)      
     except:
-      return render_template("inputDatabase.html", errore=True, ID="KeyError")
+      return render_template("inputDatabase.html", errore=True, ID="KeyError", query=query)
