@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Inserimento input
+        </title>
+
+        <style>
+            html{
+                font-family: Arial, Helvetica, sans-serif;
+                background-color: cornflowerblue;
+            }
+
+            header.input{
+                font-size: 50px;
+                font-weight: bold;
+                text-align: center;
+                padding-bottom: 15mm;
+            }
+
+            header.errore{
+                font-size: 50px;
+                font-weight: bold;
+                text-align: center;
+                padding-bottom: 15mm;
+                color: red;
+            }
+
+            div.box{
+                width: 55%;
+                margin: auto;
+                padding: 10mm;
+                border-radius: 5mm;
+                border: 5px solid blue;
+                background-color: white;
+            }
+
+            div.tasto{
+                margin-top: 1rem;
+                width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            div.input{
+                margin-top: 1rem;
+                width: fit-content;
+                text-align: left;
+            }
+            
+            ul{
+                position: relative;
+                margin-left: -11mm;
+                list-style-type: none;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        {% if errore %}
+        <header class="errore">
+            {% if ID=='IOError' %}
+            Errore! Inserito simbolo non nel linguaggio. Per favore, riprovare.
+            {% elif ID=='IndentationError' %}
+            Errore! Trovata parentesi non chiusa. Per favore, riprovare
+            {% elif ID=='SyntaxError' %}
+            Errore! Sintassi non corretta. Per favore, riprovare
+            {% elif ID=='ImportError' %}
+            Errore! Individuata variabile che inizia con un numero. Per favore, riprovare
+            {% elif ID=='NameError' %} 
+            Errore! Alcuni dei parametri non sono corretti. Per favore, riprovare.
+            {% elif ID=='PermissionError' %}
+            Errore! Nomi parametri non validi (presenza di segni sintattici). Per favore, riprovare.
+            {% elif ID=='ArgumentError' %} 
+            Errore! Input query errata. Per favore, riprovare.
+            {% elif ID=='TypeError' %} 
+            Errore! Valore di precisione non valido. Per favore, riprovare.
+            {% else %} 
+            Errore! Uno o più parametri non sono stati inseriti. Per favore, riprovare.
+            {% endif %}
+        </header>
+
+        {% else %} 
+        <header class="input">
+            Fase d'inserimento input
+        </header>        
+
+        {% endif %} 
+
+        <article>
+            <div class="box">
+                <form action="/tabella", method="POST">
+                    <table border="1">
+                        {% for i in range(rig) %} 
+                        <tr>
+                            {% if i==0 %} 
+                                <td>Nome proprietà</td>
+                                
+                                {% for j in range(col) %}  
+                                    <td> <input type="text" name="proprieta{{j}}"> </td>
+                                {% endfor %}
+                            
+                            {% else %} 
+                                <td> <input type="text" name="nome{{i}}" value="Oggetto {{i}}"/> </td>
+        
+                                {% for j in range(col) %}  
+                                    <td> <input type="number" name="entrata{{i}}{{j}}"> </td>
+                                {% endfor %} 
+        
+                            {% endif %}
+                            
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td> Scelta migliore: </td>
+                            {% for j in range(col) %} 
+                                <td> <input type="radio" name="scelta{{j}}" value="max"> Max <input type="radio" name="scelta{{j}}" value="min"> Min </td> 
+                            {% endfor %}
+                        </tr>    
+                    </table>
+                    
+                    <div class="input">
+                        Inserire query: <input type="text" name="condizione" /> <br />
+                        <p>
+                            Scegliere su cosa calcolare:
+                            <ul>
+                                <li> <input type="radio" name="modalita" value="1" /> Soddisfacibità </li>
+                                <li> <input type="radio" name="modalita" value="2" /> Valore bontà </li>
+                            </ul>
+                        </p>
+                    </div>
+                    Inserire livello precisione (inserire "inf" per calcolo esatto): 1/ <input type="text" name="den" />
+                    
+                    <div class="tasto">
+                        <input type="submit" value="Conferma">
+                    </div>
+                </form>
+        </article>
+    </body>
+
+</html>
