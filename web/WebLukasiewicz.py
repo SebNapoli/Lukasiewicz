@@ -1,3 +1,4 @@
+from tkinter import N
 from z3 import *
 from flask import Flask, render_template, request
 from services.scansioni import *
@@ -6,6 +7,7 @@ from services.risoluzione import *
 from services.ricercaStringa import *
 from services.ragionamento import *
 from services.scansioneIniziale import *
+from services.McNaughton import *
 
 app=Flask(__name__)
 
@@ -42,6 +44,9 @@ def scelta_modalità():
 
       elif scelta=='5':
         return render_template("inputDatabase.html", errore=False, ID=None, query=False)
+
+      elif scelta=='6':
+        return render_template("inputMcNaughton.html", errore=False, ID=None)
     
     except: #se non è stata selezionata nessuna opzione
       return render_template("pagina iniziale.html")
@@ -352,13 +357,14 @@ def database():
 
         den=request.form["den"]
 
+        #se è presente la query (se siamo in modalità ragionamento vago)
         if query:
           decisione=request.form["condizione"]
           modalita=request.form["modalita"]
           #chiamata della funzione principale del ragionamento
           [formule, decisione, output]=Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modalita)
 
-        else:
+        else: #se siamo in modalità solo codifica tabella
           nome_var=[]
           controlloProprietà(proprieta, oggetti, rig, col)
           #crea il nome di tutte le varibili logiche, definite come nome proprietà più il codice dell'oggetto
@@ -391,3 +397,35 @@ def database():
       return render_template("inputDatabase.html", errore=True, ID='ImportError', query=query)      
     except:
       return render_template("inputDatabase.html", errore=True, ID="KeyError", query=query)
+
+
+
+@app.route("/McNaughton", methods=["GET", "POST"])
+def McN(): #web app in modalità calcolo delle funzioni di McNaughton
+  if request.method=="GET":
+    return "<p> ERRORE </p>"
+  
+  if request.method=="POST":  
+    try:
+      formula=request.form["formula"] #input formula
+      formula=formula.replace(' ', '') #elimina gli spazi
+      if len(formula)==0: #Se la formula è vuota da un messaggio di errore
+        raise AttributeError
+
+      scansioneIniziale(formula) #controlla che la sintassi sia corretta
+      [formula, formulaC]=debugFormula(formula) #effettua il debug e il parsing automatico della formula      
+      lista=McNaughton(formulaC)
+      lista=stampa(lista)
+      return render_template("outputMcNaughton.html", formula=formula, polinomi=lista)
+      #gestione errori della sintassi
+        
+    except NotImplementedError:
+      return render_template("inputMcNaughton.html", errore=True, ID='IOError')
+    except IndentationError:
+      return render_template("inputMcNaughton.html", errore=True, ID='IndentationError')
+    except SyntaxError:
+      return render_template("inputMcNaughton.html", errore=True, ID='SyntaxError')
+    except ImportError:
+      return render_template("inputMcNaughton.html", errore=True, ID='ImportError')      
+    except:
+      return render_template("inputMcNaughton.html", errore=True, ID='NoFormula')
