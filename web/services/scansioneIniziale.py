@@ -13,8 +13,9 @@ def controllo_variabili(stringa, connettivi, sottoformule, i):
         else:
             condizione=False
 
-        if len(sottoformule)==1 and condizione: #se la stringa è conposta da un solo carattere numerico e non è una costante logica
-            raise SyntaxError
+        if len(sottoformule)==1:
+            if condizione: #se la stringa è conposta da un solo carattere numerico e non è una costante logica
+                raise SyntaxError
         elif i==0:
             if connettivi[0]!='*' and condizione: #se si trova all'inizio della formula e non è seguito da un segno di moltiplicazione
                 raise SyntaxError

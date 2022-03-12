@@ -50,12 +50,19 @@ def sottoformula(formula, var, i): #risolve una sottoformula delimitata da paren
 def negazione(formula, var, i): #risolve una negazione
   
   if formula[i+1]!='(': #se è negazione di una variabile
-    [argomento, i]=riconoscimentoVariabile(formula, i+1) #riconoscimento nome della variabile
-    for k in range(len(var)):
-      if var[k].nome==argomento:
-        j=i
-        break #individua la variabile da associare
-    x=compl(var[k].variabile) #effettua l'operazione di complemento
+    if formula[i+1]=='0':
+      x=1
+      i+=2
+    elif formula[i+1]=='1':
+      x=0
+      i+=2
+    else:
+      [argomento, i]=riconoscimentoVariabile(formula, i+1) #riconoscimento nome della variabile
+      for k in range(len(var)):
+        if var[k].nome==argomento:
+          j=i
+          break #individua la variabile da associare
+      x=compl(var[k].variabile) #effettua l'operazione di complemento
   
   else: #se è negazione di una sottoformula delimitata da parentesi
     [x, i]=sottoformula(formula, var, i+1) #risolve la sottoformula
