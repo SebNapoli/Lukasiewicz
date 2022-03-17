@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Inserimento input
+            Dimensions
         </title>
 
         <style>
@@ -61,29 +61,29 @@
         {% if errore %}
         <header class="errore">
             {% if ID=='IOError' %}
-            Errore! Inserito simbolo non nel linguaggio. Per favore, riprovare.
+            Warning! Not in language symbol found. Retry.
             {% elif ID=='IndentationError' %}
-            Errore! Trovata parentesi non chiusa. Per favore, riprovare
+            Warning! Not closed bracket found. Retry.
             {% elif ID=='SyntaxError' %}
-            Errore! Sintassi non corretta. Per favore, riprovare
+            Warning! Syntax error. Retry.
             {% elif ID=='ImportError' %}
-            Errore! Individuata variabile che inizia con un numero. Per favore, riprovare
+            Warning! A variable starting with a number was found. Retry.
             {% elif ID=='NameError' %} 
-            Errore! Alcuni dei parametri non sono corretti. Per favore, riprovare.
+            Warning! Some parameters are not correct. Retry
             {% elif ID=='PermissionError' %}
-            Errore! Nomi parametri non validi (presenza di segni sintattici). Per favore, riprovare.
+            Warning! Parameters name are not valid. Retry.
             {% elif ID=='ArgumentError' %} 
-            Errore! Input query errata. Per favore, riprovare.
+            Warning! Wrong query input. Retry.
             {% elif ID=='TypeError' %} 
-            Errore! Valore di precisione non valido. Per favore, riprovare.
+            Warning! Not valid precision. Retry. 
             {% else %} 
-            Errore! Uno o più parametri non sono stati inseriti. Per favore, riprovare.
+            Warning! One or more input not given. Retry.
             {% endif %}
         </header>
 
         {% else %} 
         <header class="input">
-            Fase d'inserimento input
+            Input phase
         </header>        
 
         {% endif %} 
@@ -121,19 +121,19 @@
                     </table>
                     
                     <div class="input">
-                        Inserire query: <input type="text" name="condizione" /> <br />
+                        Enter query: <input type="text" name="condizione" /> <br />
                         <p>
-                            Scegliere su cosa calcolare:
+                            Choose mode:
                             <ul>
-                                <li> <input type="radio" name="modalita" value="1" /> Soddisfacibità </li>
-                                <li> <input type="radio" name="modalita" value="2" /> Valore bontà </li>
+                                <li> <input type="radio" name="modalita" value="1" /> Satisfiability </li>
+                                <li> <input type="radio" name="modalita" value="2" /> Truth value </li>
                             </ul>
                         </p>
                     </div>
-                    Inserire livello precisione (inserire "inf" per calcolo esatto): 1/ <input type="text" name="den" />
+                    Enter precision ("inf" for exact computing): 1/ <input type="text" name="den" />
                     
                     <div class="tasto">
-                        <input type="submit" value="Conferma">
+                        <input type="submit" value="Confirm">
                     </div>
                 </form>
         </article>

@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Inserimento input
+            Enter input
         </title>
 
         <style>
@@ -55,29 +55,29 @@
         {% if errore %}
         <header class="errore">
             {% if ID=='IOError' %}
-            Errore! Inserito simbolo non nel linguaggio. Per favore, riprovare.
+            Warning! Not in language symbol found. Retry.
             
             {% elif ID=='IndentationError' %}
-            Errore! Trovata parentesi non chiusa. Per favore, riprovare
+            Warning! Not closed bracket found. Retry.
             
             {% elif ID=='SyntaxError' %}
-            Errore! Sintassi non corretta. Per favore, riprovare
+            Warning! Syntax error. Retry.
             
             {% elif ID=='ImportError' %}
-            Errore! Individuata variabile che inizia con un numero. Per favore, riprovare
+            Warning! A variable starting with a number was found. Retry.
             
             {% elif ID=='KeyError' %} 
-            Errore! Numero di soluzioni alternative non inserito. Per favore, riprovare.
+            Warning! Solutions nubmer not found. Retry.
             
             {% else %}
-            Errore! Inserita formula vuota. Per favore, riprovare.
+            Warning! Empty formula found. Retry.
             
             {% endif %}
         </header>
 
         {% else %} 
         <header class="input">
-            Fase d'inserimento input
+            Input phase
         </header>        
 
         {% endif %} 
@@ -87,16 +87,16 @@
                 <form action="/soddisfacibilita", method="POST">
                     
                     <div class="input">
-                        Inserire formula: <input type="text" name="formula" /> 
+                        Enter formula: <input type="text" name="formula" /> 
                     </div>
 
                     <div class="input">
-                        Inserire numero eventuale di soluzioni alternative: 
+                        Enter how many alternative solutions: 
                         <input type="number" name="N" min="0" />
                     </div>
                     
                     <div class="tasto">
-                        <input type="submit" value="Conferma">
+                        <input type="submit" value="Confirm">
                     </div>
                 </form>    
             </div>

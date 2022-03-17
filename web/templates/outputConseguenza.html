@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Risultato
+            Results
         </title>
 
         <style>
@@ -73,12 +73,12 @@
 
     <body>
         <header>
-            Risultato verifica conseguenza logica:
+            Logic consequence results:
         </header>
         {% if controesempio!=None %}
         <article class="F">
             <div class="debug">
-                <p>Interpetrazione insieme:
+                <p>Set interpretation:
                     <ul>
                         {% for formulaG in interpetrazione %} 
                             <li>{{formulaG}}</li>
@@ -86,7 +86,7 @@
                     </ul> 
                 </p>
                 
-                <p>Interpetrazione formula da verificare: <br />
+                <p>Formula interpretation: <br />
                     {{formula}}</p>
             </div>
 
@@ -99,7 +99,7 @@
             
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
 
@@ -109,7 +109,7 @@
         <article class="T">
             <div class="debug">
                 <section>
-                    Interpetrazione insieme:
+                    Set interpretation:
                     <ul>
                         {% for formulaG in interpetrazione %} 
                             <li>{{formulaG}}</li>
@@ -117,7 +117,7 @@
                     </ul> 
                 </section>
 
-                <p>Interpetrazione formula da verificare: <br />
+                <p>Formula interpretation: <br />
                     {{formula}}</p>
             </div>
 
@@ -127,7 +127,7 @@
             
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
 

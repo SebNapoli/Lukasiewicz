@@ -1,4 +1,5 @@
-from tkinter import N
+#importing libraries
+from secrets import choice
 from z3 import *
 from flask import Flask, render_template, request
 from services.scansioni import *
@@ -8,55 +9,59 @@ from services.ricercaStringa import *
 from services.ragionamento import *
 from services.scansioneIniziale import *
 from services.McNaughton import *
+from services.printMcNaughton import *
 
+#calling Flash library for HTML treatment
 app=Flask(__name__)
 
-#stampa della pagina iniziale della web app
+#This function prints the home page of the web-app
 @app.route("/")
-def pagina_iniziale():
-  return render_template("pagina iniziale.html") #richiama il file html per la scelta iniziale
+def home_page():
+  return render_template("pagina iniziale.html") #calls the HTML file for the starting choice
 
 
 
-#Funzione che, a seconda della scelta fatta dall'utente nella pagina iniziale, sceglia la modalità corretta del programma
+#This function chooses the right mode wanted by the user
 @app.route("/scelta", methods=["GET", "POST"])
-def scelta_modalità():
-  if request.method=="GET": #se entrato attraverso URL e non la scelta, da messagio di errore
+def choose_mode():
+  if request.method=="GET": #Error message if the user get here from the URL
     return "<h1> ERRORE! </h1>"
   
   if request.method=="POST":
     try:
-      scelta=request.form["scelta"] #prende in input la scelta
-      if scelta=='help':
-        return render_template("aiuto.html") #stampa il manuale in formato html
+      choice=request.form["scelta"] #The scripts gets user's input
+      if choice=='help':
+        return render_template("aiuto.html") #It prints the manual in HTML format
 
-      elif scelta=='1':
+      #If not help, choose the mode and prints the right HTML file
+      elif choice=='1':
         return render_template("inputSoddisfacibilità.html", errore=False, ID=None)
 
-      elif scelta=='2':
+      elif choice=='2':
         return render_template("inputConseguenza.html", errore=False, ID=None)
 
-      elif scelta=='3':
+      elif choice=='3':
         return render_template("inputDimensioni.html", errore=False)
 
-      elif scelta=='4':
+      elif choice=='4':
         return render_template("inputDatabase.html", errore=False, ID=None, query=True)
 
-      elif scelta=='5':
+      elif choice=='5':
         return render_template("inputDatabase.html", errore=False, ID=None, query=False)
 
-      elif scelta=='6':
+      elif choice=='6':
         return render_template("inputMcNaughton.html", errore=False, ID=None)
     
-    except: #se non è stata selezionata nessuna opzione
-      return render_template("pagina iniziale.html")
+    except: #if no option was selected
+      return render_template("pagina iniziale.html") #print the home page again
 
 
 
 
-#programmma in modalità risolutore di una singola formula
+#Web app in satisfability mode
 @app.route("/soddisfacibilita", methods=["GET", "POST"])
-def singolaFormula(): 
+
+def satisfability(): 
   if request.method=="GET":
     return "<p> ERRORE </p>"
   
@@ -65,41 +70,41 @@ def singolaFormula():
     
     try:
       formula=request.form["formula"] #input formula
-      N=int(request.form["N"]) #input numero di soluzioni alternative da dare
+      N=int(request.form["N"]) #input number of alternative solutions
     
-    except: #Se non è stato inserito nessun numero, stampa un messaggio di errore
+    except: #Print a error message if no number was given
       return render_template("inputSoddisfacibilità.html", errore=True, ID="KeyError")
     
 
-    formula=formula.replace(' ', '') #elimina gli spazi
+    formula=formula.replace(' ', '') #delete useless spaces
 
     try:
-      if len(formula)==0: #Se la formula è vuota da un messaggio di errore
+      if len(formula)==0: #Raise an error if the users gives an empty formula
         raise AttributeError
 
-      scansioneIniziale(formula) #controlla che la sintassi sia corretta
-      [formula, formulaC]=debugFormula(formula) #effettua il debug e il parsing automatico della formula
-      var=generaVariabili(formulaC, s) #costruzione lista delle variabili
+      initial_scansion(formula) #syntax control (it raises an exception if there is a error)
+      [formula, new_formula]=debugFormula(formula) #debug and parsing of the formula
+      var=create_variables(new_formula, s) #creation of the variabiles list
         
-      if len(var)>1:
+      if len(var)>1: #removes useless brackets
           formula=formula[1:-1]
       
-      x=risolvi(formulaC, var) #calcolo valore di verità della formula
-      s.add(x==1) #aggiunta condizione verità formula          
-      if s.check()==sat: #se la formula è soddisfacibile
-        if len(var)>0: #se sono presenti variabili proposizionali è possibile dare un modello
-          modello=s.model() 
-          alternative=AltreSoluzioni(modello, var, N, s)
-          return render_template("outputSoddisfacibilità.html", formula=formula, alternative=alternative, output=str(modello)[1:-1], sodd=True)
+      x=resolving(new_formula, var) #thuth value computation
+      s.add(x==1) #add thuth condition for the solver          
+      
+      if s.check()==sat: #if the formula is satisfable
+        if len(var)>0: #if there are some variables, the app can give a model
+          model=s.model() 
+          alternative=alternatives(model, var, N, s) #for other solutions
+          return render_template("outputSoddisfacibilità.html", formula=formula, alternative=alternative, output=str(model)[1:-1], sodd=True)
                 
-        else: #se sono presenti solo constanti, non è possibile generare un modello
+        else: #if there are only logical constants, the app can't give a model
           return render_template("outputSoddisfacibilità.html", formula=formula, alternative=None, output=None, sodd=True)
           
-      else:
+      else: #if the formula is not satisfable
         return render_template("outputSoddisfacibilità.html", formula=formula, alternative=None, output=None, sodd=False)
 
-      #gestione errori della sintassi
-        
+    #Error treatment    
     except NotImplementedError:
       return render_template("inputSoddisfacibilità.html", errore=True, ID='IOError')
     except IndentationError:
@@ -112,100 +117,102 @@ def singolaFormula():
       return render_template("inputSoddisfacibilità.html", errore=True, ID='NoFormula')
 
 
-
+#Web app in logic consequence mode
 @app.route("/conseguenza", methods=["GET", "POST"])
-def ConseguenzaLogica():
+def consequence():
 
   if request.method=="GET":
     return "<p> ERRORE </p>"
   
   if request.method=="POST":  
-    try: #continua fin quando non trova un errore
+    try: #if there isn't an error
       s=Solver()
-      insieme=request.form["insieme"].split("\n") #divide la stringa per tutte le volte che è stato digitato invio
-      for i in range(len(insieme)): #parsing di tutte le formule di Gamma
-        insieme[i]=insieme[i].replace('\r', '')
-        insieme[i]=insieme[i].replace(' ', '')
-        #eliminazioni di caratteri indesiderati
+      set=request.form["insieme"].split("\n") #split the input string every time it founds a newline
+      for i in range(len(set)): 
+        set[i]=set[i].replace('\r', '')
+        set[i]=set[i].replace(' ', '')
+        #delete useless characters
 
-      while '' in insieme:
-        insieme.remove('')
-      #rimozione dall'insieme di tutte le formule vuote
+      while '' in set:
+        set.remove('')
+      #delete all empty formulas in the set
       
-      insiemeC=[] 
-      for i in range(len(insieme)): #parsing di tutte le formule di Gamma
-        insiemeC.append('')
-        scansioneIniziale(insieme[i])
-        [insieme[i], insiemeC[i]]=debugFormula(insieme[i])
-        [argomento, u]=riconoscimentoVariabile(insiemeC[i], 0)
-        if argomento!=insiemeC[i]:
-          insieme[i]=insieme[i][1:-1]
+      new_set=[] 
+      for i in range(len(set)): #parsing of all formulas in the set
+        new_set.append('')
+        initial_scansion(set[i])
+        [set[i], new_set[i]]=debugFormula(set[i])
+        argument=variable_name(new_set[i], 0)[0]
+        if argument!=new_set[i]:
+          set[i]=set[i][1:-1]
 
-      formula=request.form["formula"]
+      formula=request.form["formula"] #input formula
       formula=formula.replace(' ', '')
       if len(formula)==0:
         raise AttributeError
 
-      scansioneIniziale(formula)
-      [formula, formulaC]=debugFormula(formula) #parsing e debug formula da verificare
-      [argomento, u]=riconoscimentoVariabile(formulaC, 0)
-      if argomento!=formulaC:
+      initial_scansion(formula)
+      [formula, new_formula]=debugFormula(formula)
+      argument=variable_name(new_formula, 0)[0]
+      if argument!=new_formula:
         formula=formula[1:-1]
 
-      con=''
-      if len(insieme)!=0: #se l'insieme Gamma è un insieme non vuoto
-        for i in range(len(insieme)): #sostituisce l'insieme Gamma con una serie di congiunzioni
+      conj=''
+      if len(set)!=0: #if the set is not empty
+        for i in range(len(set)): #unify the set as a big conjunction
           if i==0:
-            con='('+insiemeC[0]+')'
+            conj='('+new_set[0]+')'
           else:
-            con=merge('&', con, '('+insiemeC[i]+')')
+            conj=merge('&', conj, '('+new_set[i]+')')
 
-        var=generaVariabili(con, s) #generazione e semplificazione delle formule
-        varN=generaVariabili(formulaC, s) 
-        x=risolvi(con, var)
-        y=risolvi(formulaC, varN)
+        #truth values computations
+        var=create_variables(conj, s)
+        varN=create_variables(new_formula, s) 
+        x=resolving(conj, var)
+        y=resolving(new_formula, varN)
 
-        s.add(And(x==1, y<1)) #crea la condizione "l'insieme è soddisfacibile ma non la formula"
+        s.add(And(x==1, y<1)) #create the condition "if set is satisfable but the formula not"
 
-        interpetrazione=[]
+        interpretation=[]
 
-        for formulaG in insieme:
-          interpetrazione.append(formulaG)
+        for formulaG in set:
+          interpretation.append(formulaG)
           
-        if s.check()==unsat: #se la condizione non è soddisfacibile (se la formula è conseguenza)
-          risultato="La formula è conseguenza logica"
-          return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula ,risultato=risultato, controesempio=None)
+        if s.check()==unsat: #if the condition is not satisfable (see as the formula is logic consequence)
+          result="The formula is logic consequence"
+          return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula ,risultato=result, controesempio=None)
             
-        else: #altrimenti
-          if (len(var)+len(varN))>0: #se la formula ha almeno una variabile proposizionale (è possibile dare un controesempio)
-            risultato="La formula non è conseguenza logica. "
-            controesempio= "Un possibile controesempio è dato da queste assegnazioni: "+str(s.model())[1:-1]
-            return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula, risultato=risultato, controesempio=controesempio)
+        else: #if the formula isn't logic consequence
+          if (len(var)+len(varN))>0: #if there is at least one variable, the app can provide a counterexample
+            result="The formula isn't logic consequence. "
+            counterexample= "A possible counterexample: "+str(s.model())[1:-1]
+            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=counterexample)
           else:
-            risultato="La formula non è conseguenza logica."
-            return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula, risultato=risultato, controesempio=None)
+            result="the formula isn't logic consequence."
+            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=None)
 
-      else: #se l'insieme è vuoto (verifica che la formula è tautologia)
-        var=generaVariabili(formulaC, s)
-        x=risolvi(formulaC, var)
-        s.add(x<1) #aggiunge la condizione "la formula non è una tautologia"
+      else: #if the set is empty
+        var=create_variables(new_formula, s)
+        x=resolving(new_formula, var)
+        s.add(x<1) 
 
-        interpetrazione=["Insieme vuoto."]
+        interpretation=["Empty set."]
 
-        if s.check()==unsat: #se la condizione non è soddisfacibile (se la formula è conseguenza)
-          risultato="La formula è conseguenza logica"
-          return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula, risultato=risultato, controesempio=None)
+        if s.check()==unsat: #if the condition is not satisfable
+          result="The formula is logic consequence"
+          return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=None)
             
-        else: #altrimenti
-          if (len(var))>0: #se la formula ha almeno una variabile proposizionale (è possibile dare un controesempio)
-            risultato="La formula non è conseguenza logica. "
-            controesempio= "Un possibile controesempio è dato da queste assegnazioni: "+str(s.model())[1:-1]
-            return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula, risultato=risultato, controesempio=controesempio)
+        else: 
+          if (len(var))>0: #if there is at least one variable, the app can provide a counterexample
+            result="The formula is not logic consequence."
+            counterexample= "A possible counterexample: "+str(s.model())[1:-1]
+            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=counterexample)
             
           else:
-            risultato="La formula non è conseguenza logica."
-            return render_template("outputConseguenza.html", interpetrazione=interpetrazione, formula=formula, risultato=risultato, controesempio=None)          
+            result="The formula is not logic consequence."
+            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=None)          
 
+    #errors treatment
     except NotImplementedError:
       return render_template("inputConseguenza.html", errore=True, ID='IOError')
     except IndentationError:
@@ -218,9 +225,9 @@ def ConseguenzaLogica():
       return render_template("inputConseguenza.html", errore=True, ID="NoFormula")
       
 
-#Se viene scelta il ragionamento vago con inserimento tabella, prende in input le dimensioni
+#Web app in reasoning mode (from user's input): get table dimensions
 @app.route("/ragionamento", methods=["GET", "POST"])
-def dim_tabella():
+def dimensions():
   if request.method=="GET":
     return "<p> ERRORE </p>"
   
@@ -228,91 +235,89 @@ def dim_tabella():
     try:
       r=int(request.form["rig"])
       col=int(request.form["col"])
-      rig=r+1
-      return render_template("inputTabella.html", errore=False, ID=None, rig=rig, col=col)
+      row=r+1
+      return render_template("inputTabella.html", errore=False, ID=None, rig=row, col=col)
     
-    except: #se almeno uno dei due campi è vuoto
+    except: #if at least one form is empty, give an error message
       return render_template("inputDimensioni.html", errore=True)
 
 
 
-#programma in modalità ragionamento da tabella presa in input
+#Web app in reasoning mode (from user's input)
 @app.route("/tabella", methods=["GET", "POST"])
-def Ragionamento_Vago():
+def reasoning():
 
   if request.method=="GET":
     return "<p> ERRORE </p>"
   
   if request.method=="POST":
-    tab=list(request.form) #restituisce i nomi di tutti i box per l'input
-    #liste utili per maneggiare le informazioni
-    lista=[]
-    proprieta=[]
-    oggetti=[]
-    confronti=[]
-    tabella=[]
+    tab=list(request.form) #returns all box names
+    
+    List=[]
+    property=[]
+    objects=[]
+    comparison=[]
+    table=[]
     col=0
-    rig=0
+    row=0
 
     try:
-      for i in range(len(tab)): #suddiviose dell'input secondo il suo tipo 
+      for i in range(len(tab)): #split the input 
         x=request.form[tab[i]] 
 
         if "proprieta" in tab[i]:
           col+=1
-          proprieta.append(x)
+          property.append(x)
 
         elif "nome" in tab[i]:
-          rig+=1
-          oggetti.append(x)
+          row+=1
+          objects.append(x)
           
         elif "entrata" in tab[i]:
-          lista.append(x)
+          List.append(x)
           
         elif "scelta" in tab[i]:
-          confronti.append(x)
+          comparison.append(x)
 
         elif "condizione" in tab[i]:
-          decisione=x
+          query=x
 
         elif "den" in tab[i]:
           den=x
         
         elif "modalita" in tab[i]:
-          modalita=x
+          mode=x
 
-      for i in range(rig): #sistemazione dei valori numerici in tabella e forzatura del tipo in int
-        tabella.append(lista[i*col: (i+1)*col])
+      for i in range(row): #put numerical values in the table and 
+        table.append(List[i*col: (i+1)*col])
         for j in range(col):
-          tabella[i][j]=int(tabella[i][j])        
-        #impongo che i valori siano degli interi (di base sono stati presi in input come stringhe)
+          table[i][j]=int(table[i][j])        
 
-      [formule, decisione, output]=Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modalita)
+      [formulas, query, output]=Rea(row, col, property, objects, table, comparison, query, den, mode)
 
-      return render_template("outputRagionamento.html", formule=formule, decisione=decisione, output=output)
+      return render_template("outputRagionamento.html", formule=formulas, decisione=query, output=output)
     
-    #gestione di tutti i possibili errori
     except NameError:
-      return render_template("inputTabella.html", errore=True, ID="NameError", rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID="NameError", rig=row+1, col=col)
     except PermissionError:
-      return render_template("inputTabella.html", errore=True, ID="PermissionError", rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID="PermissionError", rig=row+1, col=col)
     except ArgumentError:
-      return render_template("inputTabella.html", errore=True, ID="ArgumentError", rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID="ArgumentError", rig=row+1, col=col)
     except TypeError:
-      return render_template("inputTabella.html", errore=True, ID="TypeError", rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID="TypeError", rig=row+1, col=col)
     except NotImplementedError:
-      return render_template("inputTabella.html", errore=True, ID='IOError', rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID='IOError', rig=row+1, col=col)
     except IndentationError:
-      return render_template("inputTabella.html", errore=True, ID='IndentationError', rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID='IndentationError', rig=row+1, col=col)
     except SyntaxError:
-      return render_template("inputTabella.html", errore=True, ID='SyntaxError', rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID='SyntaxError', rig=row+1, col=col)
     except ImportError:
-      return render_template("inputTabella.html", errore=True, ID='ImportError', rig=rig+1, col=col)      
+      return render_template("inputTabella.html", errore=True, ID='ImportError', rig=row+1, col=col)      
     except: #almeno uno dei campi è vuoto
-      return render_template("inputTabella.html", errore=True, ID="KeyError", rig=rig+1, col=col)
+      return render_template("inputTabella.html", errore=True, ID="KeyError", rig=row+1, col=col)
 
 
-#programma in modalità ragionamento da database esterno
+#Web app in database mode
 @app.route("/database", methods=["POST", "GET"])
 def database():
 
@@ -320,20 +325,20 @@ def database():
       return "<p> ERRORE </p>"
     
   if request.method=="POST":
-    if "condizione" in list(request.form):
+    if "condizione" in list(request.form): #if it's in reasoning from databale mode
       query=True
     else:
       query=False
 
     try:
-      with open(request.form["database"]) as f: #apertura database
-        oggetti=[]
-        tabella=[]
-        confronti=[]
+      with open(request.form["database"]) as f: #opening database
+        objects=[]
+        table=[]
+        comparison=[]
 
-        #estazione di tutti i dati nella tabella
+        #estracting data
         data=f.readlines()
-        rig=len(data)-1
+        row=len(data)-1
 
         for i in range(len(data)):
           riga=data[i].split(',')
@@ -341,44 +346,43 @@ def database():
 
           riga[len(riga)-1]=riga[len(riga)-1].replace('\n', '')
           if i==0:
-            proprieta=riga[1:]
+            property=riga[1:]
             col=len(riga)-1
 
           else:
-            oggetti.append(riga[0])
-            tabella.append(riga[1:])
+            objects.append(riga[0])
+            table.append(riga[1:])
         
         for j in range(col):
-          confronti.append("max")
+          comparison.append("max")
 
-        for i in range(rig):
+        for i in range(row):
           for j in range(col):
-            tabella[i][j]=int(tabella[i][j])
+            table[i][j]=int(table[i][j])
 
         den=request.form["den"]
 
-        #se è presente la query (se siamo in modalità ragionamento vago)
-        if query:
-          decisione=request.form["condizione"]
-          modalita=request.form["modalita"]
+        
+        if query: #if the app is in reasoning mode
+          decision=request.form["condizione"]
+          mode=request.form["modalita"]
           #chiamata della funzione principale del ragionamento
-          [formule, decisione, output]=Rag(rig, col, proprieta, oggetti, tabella, confronti, decisione, den, modalita)
+          [formule, decisione, output]=Rea(row, col, property, objects, table, comparison, decision, den, mode)
 
-        else: #se siamo in modalità solo codifica tabella
-          nome_var=[]
-          controlloProprietà(proprieta, oggetti, rig, col)
+        else: #if the app is in table coding mode
+          var_name=[]
+          par_control(property, objects, row, col)
           #crea il nome di tutte le varibili logiche, definite come nome proprietà più il codice dell'oggetto
-          for i in range(rig):
-            nome_var.append([])
+          for i in range(row):
+            var_name.append([])
             for j in range(col):
-              nome_var[i].append(proprieta[j]+str(i+1))
+              var_name[i].append(property[j]+str(i+1))
 
-          formule=costruzioneFormule(tabella, nome_var, confronti, rig, col, den)
+          formule=formulas_construction(table, var_name, comparison, row, col, den)
           decisione=output=None
 
         return render_template("outputRagionamento.html", formule=formule, decisione=decisione, output=output)
         
-    #gestione di tutti i possibili errori
     except NameError:
       return render_template("inputDatabase.html", errore=True, ID="NameError", query=query)
     except PermissionError:
@@ -399,25 +403,25 @@ def database():
       return render_template("inputDatabase.html", errore=True, ID="KeyError", query=query)
 
 
-
+#Web app in McNaughton function computing mode
 @app.route("/McNaughton", methods=["GET", "POST"])
-def McN(): #web app in modalità calcolo delle funzioni di McNaughton
+def McN():
   if request.method=="GET":
     return "<p> ERRORE </p>"
   
   if request.method=="POST":  
     try:
       formula=request.form["formula"] #input formula
-      formula=formula.replace(' ', '') #elimina gli spazi
-      if len(formula)==0: #Se la formula è vuota da un messaggio di errore
+      formula=formula.replace(' ', '') #delete useless spaces
+      if len(formula)==0: #If an empty formula is found, give an error message
         raise AttributeError
 
-      scansioneIniziale(formula) #controlla che la sintassi sia corretta
-      [formula, formulaC]=debugFormula(formula) #effettua il debug e il parsing automatico della formula      
-      lista=McNaughton(formulaC)
-      lista=stampa(lista)
-      return render_template("outputMcNaughton.html", formula=formula, polinomi=lista)
-      #gestione errori della sintassi
+      initial_scansion(formula) #syntax control
+      [formula, new_formula]=debugFormula(formula) #debugging and parsing formula      
+      function=McNaughton(new_formula) #McNaughton function computing 
+      #output treatment
+      [output, domains]=pol_print(function) 
+      return render_template("outputMcNaughton.html", formula=formula, output=output, domini=domains, N=len(output))
         
     except NotImplementedError:
       return render_template("inputMcNaughton.html", errore=True, ID='IOError')

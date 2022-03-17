@@ -1,6 +1,6 @@
-#file con tutti algoritmi numerici o per ricavate dai modelli di z3 i valori numerici delle soluzioni
+#file content: Numerical algoritms
 
-#calcolo massimo comun divisore
+#MCD computing
 def MCD(a, b):
     if b==1:
         return 1
@@ -10,37 +10,37 @@ def MCD(a, b):
         return MCD(b, a%b)
 
 
-#per ogni proprietà della tabella, si calcola il minimo e il massimo
-def MassimiMinimi(tabella, rig, col):
-  massimi=[]
-  minimi=[]
+#for all properties, return max and min value
+def MaxMin(table, rig, col):
+  maxs=[]
+  mins=[]
 
   for j in range(col):
     for i in range(rig):
       if i==0:
-        x=y=tabella[i][j]
+        x=y=table[i][j]
         
       else:
-        x=min(x, tabella[i][j])
-        y=max(y, tabella[i][j]) 
+        x=min(x, table[i][j])
+        y=max(y, table[i][j]) 
     
-    minimi.append(x)
-    massimi.append(y) #calcolo del valore massimo e del valore minimo per ogni proprietà
+    mins.append(x)
+    maxs.append(y) 
   
-  return massimi, minimi
+  return maxs, mins
 
-#ricava dal modello il valore di verità
-def valore(nome_var, modello): 
-  for d in modello.decls():
-    if nome_var==d.name():
-      frazione=str(modello[d])
+#return the thuth value of a variable from the model
+def value(var_name, model): 
+  for d in model.decls():
+    if var_name==d.name():
+      fraction=str(model[d])
       
-      if '/' in frazione:
-        ind=frazione.index('/')
-        num=int(frazione[:ind])
-        den=int(frazione[ind+1:])
+      if '/' in fraction:
+        ind=fraction.index('/')
+        num=int(fraction[:ind])
+        den=int(fraction[ind+1:])
       else:
-        num=int(frazione)
+        num=int(fraction)
         den=1
 
       val=float(num/den)

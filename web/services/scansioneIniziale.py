@@ -1,76 +1,86 @@
-#funzione per il controllo che la formula sia scritta correttamente
+#file content: initial syntax controll functions
 from services.ricercaStringa import *
 from services.scansioni import *
 
-#funzione che controlla se una certa stringa sia numerica, letterale o alfanumerica
-def controllo_variabili(stringa, connettivi, sottoformule, i):
+#check if a string is a number, is leteral or alphanumerical
+def alnum_control(string, connectives, subformulas, i):
 
-    c=True
-    if stringa.isdecimal(): #se la stringa è numerica
-        c=False #non sono stati trovati simboli non validi
-        if stringa not in costanti_logiche:
+    not_alphanum=True #if this variable is true, it means that the string is not alphanumerical
+
+    if string.isdecimal(): #if the string is a number
+        not_alphanum=False 
+        
+        if string not in logic_con:
             condizione=True
         else:
             condizione=False
 
-        if len(sottoformule)==1:
-            if condizione: #se la stringa è conposta da un solo carattere numerico e non è una costante logica
+        if len(subformulas)==1:
+            if condizione: #if it's only 1 formula and it's a number != 0 and 1, error
                 raise SyntaxError
+        #if we are at the start of the formula and it's not followed by a moltiplication (and !=0 and 1), error
         elif i==0:
-            if connettivi[0]!='*' and condizione: #se si trova all'inizio della formula e non è seguito da un segno di moltiplicazione
+            if connectives[0]!='*' and condizione: 
                 raise SyntaxError
-        elif i==(len(sottoformule)-1):
-            if connettivi[i-1]!='P' and condizione: #se si trova alla fine è non è preceduto da un simbolo di potenza
+
+        elif i==(len(subformulas)-1):
+            #if it's at the end and it isn't preceded by a power symbol, error
+            if connectives[i-1]!='P' and condizione: 
                 raise SyntaxError
-        elif connettivi[i-1]!='P' and connettivi[i]!='*' and condizione: #se è un numero diverso da 0 e 1 
-            #se questa condizione è rispettata allora sarebbe una variabile
+
+        #if it's not 0 and 1 and it's not followed by moltiplication and it's not preceded by power, error
+        elif connectives[i-1]!='P' and connectives[i]!='*' and condizione:  
             raise SyntaxError
-        elif connettivi[i-1]=='P' and connettivi[i]=='*': #una formula di questo dipo non ha senso
+        
+        #strings like this have no sense 
+        elif connectives[i-1]=='P' and connectives[i]=='*': 
             raise SyntaxError
 
-    elif stringa.isalpha(): #se è una stinga letterale
-        c=False
-        if i!=(len(sottoformule)-1):
-            if connettivi[i]=='*':
+    elif string.isalpha(): #if it's a literal string
+        not_alphanum=False
+        if i!=(len(subformulas)-1):
+            if connectives[i]=='*':
                 raise SyntaxError
         elif i!=0:
-            if connettivi[i-1]=='P':
+            if connectives[i-1]=='P':
                 raise SyntaxError
 
-    #controlla che non sia preceduta da un simbolo di potenza o seguta da un simbolo di moltiplicazione
+    #the script check if it's followed by a moltiplication or preceded by a power (error)
 
-    elif stringa.isalnum():
-        c=False
-        if stringa[0].isdecimal():
+    elif string.isalnum():
+        not_alphanum=False
+        if string[0].isdecimal():
             raise ImportError
         
-        if i!=(len(sottoformule)-1):
-            if connettivi[i]=='*':
+        if i!=(len(subformulas)-1):
+            if connectives[i]=='*':
                 raise SyntaxError
         elif i!=0:
-            if connettivi[i-1]=='P':
+            if connectives[i-1]=='P':
                 raise SyntaxError
 
-    #come sopra ma in più controlla che non inizi con un numero
+    #as before, plus the condition it can't start with a number
 
-    return c
+    return not_alphanum #return if the string is alphanumerical
 
 
-
-def scansioneIniziale(formula): #controlla, prima di qualsiasi operazione, se la sintassi è corretta. Se non lo è, genera un'eccezione differente per il tipo di errore
+#the function checks if the formula is syntatical correct
+def initial_scansion(formula): 
     i=0
     n=len(formula)-1
 
-    #Errore se la formula inizia o finisce con un connettivo binario o se finisce con un segno di negazione
+    #Error with connective (=! negation) at the start
     if formula[0] in con:
-        raise SyntaxError    
+        raise SyntaxError
+    
+    #Error with connective at the end
     if (formula[n] in con) or (formula[n]=='-'):
         raise SyntaxError
 
-    #controllo che tutte le parentesi siano aperte e chiuse
+    #brackets control
     while i<n:
         if formula[i]=='(':
-            j=trovaParentesi(formula, i)
+            j=find_bracket(formula, i)
             if j==-1:
                 raise IndentationError
             i=j+1
@@ -78,22 +88,22 @@ def scansioneIniziale(formula): #controlla, prima di qualsiasi operazione, se la
             raise SyntaxError
         i+=1
 
-    #genera tutte le sottoformule separate da connettivi binari
-    [sottoformule, connettivi]=scansione(formula)
+    #create subformulas
+    [subformulas, connectives]=scansion(formula)
 
-    #controllo correttezza su ogni sottoformula
-    for i in range(len(sottoformule)):
-        stringa=sottoformule[i]
-        simboli_invalidi=controllo_variabili(stringa, connettivi, sottoformule, i)
+    #control on every subformula
+    for i in range(len(subformulas)):
+        string=subformulas[i]
+        not_alphanum=alnum_control(string, connectives, subformulas, i)
 
-        #se la stringa iniziona con un segno di negazione, si controlla da dopo il segno
-        if stringa[0]=='-':
-            simboli_invalidi=controllo_variabili(stringa[1:], connettivi, sottoformule, i)
+        #if there is a negation symbol, check after that
+        if string[0]=='-':
+            not_alphanum=alnum_control(string[1:], connectives, subformulas, i)
 
-        #se si trova una parentesi, si controlla cosa c'è in parentesi
-        elif stringa[0]=='(':
-            scansioneIniziale(stringa[1:-1])
+        #if there is a bracket, check the subformula
+        elif string[0]=='(':
+            initial_scansion(string[1:-1])
         
-        #errore se si trovano simboli non validi
-        elif simboli_invalidi:
+       
+        elif not_alphanum: #error if the checked string is not alphanumerical (symbol not accepted)
             raise NotImplementedError

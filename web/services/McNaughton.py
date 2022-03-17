@@ -1,238 +1,170 @@
+#file content: algoritms for McNaughton's functions
 from services.modificheMcNaughton import *
 from services.ricercaStringa import *
-from services.polinomi import polinomio, vincoli
+from services.polinomi import linear_polynomials
 
+#domains operatons
+def check_domains(pol_list, x, y, lim, sign):
+    [el1, el2]=useless_constrains(x, y.domain, lim, sign)
+    #check if some conditions can be ignored
+    if not(el1): #if the new condition can't be ignored
 
-def generaPolinomi(lista, y, coefficiente1, coefficiente2, lim, b):
-    nuova_lista=[]
-    for k in range(len(lista)):
-        x=lista[k]
+        if not(el2): #if the old conditions can't be ignored
+            y.new_cond(x.coef, x.cons_term, lim, sign) #simply add the new one
+        else:
+            y.domain=[]
+            y.new_cond(x.coef, x.cons_term, lim, sign) #replace the old ones with the new one
+
+    delete=delete_impossible(y.domain)
+    #check if it's an empty domain
+    if not(delete): #if it isn't
+        pol_list.append(y) #add the linear polynomal in the list
+    
+    return pol_list
+
+#generate the polynomials for all Lukasiewicz's operations
+def polynomials_generation(pol_list, y, coef1, coef2, lim, b):
+    new_list=[] #This list will contain the new polynomials
+    for k in range(len(pol_list)):
+        x=pol_list[k]
 
         for j in range(len(y)):
-            val_lim=polinomio(lim)
-            z=polinomio((coefficiente1*x.tNoto)+(coefficiente2*y[j].tNoto)+b)
-            z.dominio=lista[k].dominio+y[j].dominio
+            #The new polynomials have to respect the old coinstrains
+            val_lim=linear_polynomials(lim)
+            val_lim.domain=pol_list[k].domain+y[j].domain
+            z=linear_polynomials((coef1*x.cons_term)+(coef2*y[j].cons_term)+b)
+            z.domain=pol_list[k].domain+y[j].domain
 
+            #creation of new polynomials (see McNaughton's article for base algortim)
             for var1 in x.coef:
-                unico=True
+                new=True
                 for var2 in y[j].coef:
-                    if var1.nome==var2.nome:
-                        z.nuovo_coefficiente(var1.nome, (coefficiente1*var1.coefficiente)+(coefficiente2*var2.coefficiente))
-                        unico=False
-                        break
+                    if var1.name==var2.name:
+                        z.new_coef(var1.name, (coef1*var1.coef_value)+(coef2*var2.coef_value))
+                        new=False
+                        break #operations between polynomials
                             
-                if unico:
-                    z.nuovo_coefficiente(var1.nome, (coefficiente1*var1.coefficiente))
+                if new: #append the variables of first pol if there isn't the same name in the second_memberond pol
+                    z.new_coef(var1.name, (coef1*var1.coef_value))
 
+            #as before
             for var2 in y[j].coef:
-                unico=True
+                new=True
                 for var1 in x.coef:
-                    if var1.nome==var2.nome:
-                        unico=False
+                    if var1.name==var2.name:
+                        new=False
                         break
                             
-                if unico:
-                    z.nuovo_coefficiente(var2.nome, (coefficiente2*var2.coefficiente))
-            
+                if new:
+                    z.new_coef(var2.name, (coef2*var2.coef_value))
+
+            #check if there are some useless constrains and if the domain is not empty  
             if lim==0:
-                z.aggiungi_cond(z.coef, z.tNoto, lim, ">=")
-                elimina=elimina_inconsistenti(z.dominio)
-                if not(elimina):
-                    nuova_lista.append(z)
+                new_list=check_domains(new_list, z, val_lim, lim, '<')
+                new_list=check_domains(new_list, z, z, lim, ">=")    
+            else:                
+                new_list=check_domains(new_list, z, val_lim, lim, '>')
+                new_list=check_domains(new_list, z, z, lim, "<=")
+    return new_list #return the new list
 
-                val_lim.aggiungi_cond(z.coef, z.tNoto, lim, "<")
-                elimina=elimina_inconsistenti(val_lim.dominio)
-                if not(elimina):
-                    nuova_lista.append(val_lim)
-
-            else:
-                z.aggiungi_cond(z.coef, z.tNoto, lim, "<=")
-                elimina=elimina_inconsistenti(z.dominio)
-                if not(elimina):
-                    nuova_lista.append(z)
-
-                val_lim.aggiungi_cond(z.coef, z.tNoto, lim, ">")
-                elimina=elimina_inconsistenti(val_lim.dominio)
-                if not(elimina):
-                    nuova_lista.append(val_lim)
-
-            
-
-    return nuova_lista
-
-def cambioSegno(x):
+def change_sign(x): #negation for polynomials
     for j in range(len(x)):
-        y=polinomio(1-x[j].tNoto)
+        y=linear_polynomials(1-x[j].cons_term)
         var=x[j].coef
         for k in range(len(var)):
-            y.nuovo_coefficiente(var[k].nome, -var[k].coefficiente)
-        y.dominio=x[j].dominio
+            y.new_coef(var[k].name, -var[k].coef_value)
+        y.domain=x[j].domain
         x[j]=y
 
     return x
 
-def MNsottoformula(formula, i): #risolve una sottoformula delimitata da parentesi
-  k=trovaParentesi(formula, i)
+
+def MNsubformula(formula, i): #McNaughton's function computation for a subformula between brackets
+  k=find_bracket(formula, i)
   x=McNaughton(formula[i+1:k]) 
   i=k+1
-  return x, i #restituisce valore e posizione della scansione
+  return x, i #return polynomials and scansion position
 
-def MNnegazione(formula, i): #risolve una negazione
-  
-  if formula[i+1]!='(': #se è negazione di una variabile
+
+def MNnegation(formula, i): #McNaughton's function computation for a negation
+  if formula[i+1]!='(': #if it isn't a negation of a subformula
     if formula[i+1]=='0':
-        y=polinomio(1)
+        y=linear_polynomials(1)
         i+=2
     elif formula[i+1]=='1':
-        y=polinomio(0)
+        y=linear_polynomials(0)
         i+=2
     else:
-        [argomento, i]=riconoscimentoVariabile(formula, i+1) #riconoscimento nome della variabile
-        y=polinomio(1)
-        y.nuovo_coefficiente(argomento, -1)
+        [argument, i]=variable_name(formula, i+1) #find the variable name 
+        y=linear_polynomials(1)
+        y.new_coef(argument, -1)
     x=[]
     x.append(y)
+  else: 
+    [x, i]=MNsubformula(formula, i+1) #subformula computation
+    x=change_sign(x)
+  return x, i #return polynomials and scansion position
 
-  else: #se è negazione di una sottoformula delimitata da parentesi
-    [x, i]=MNsottoformula(formula, i+1) #risolve la sottoformula
-    x=cambioSegno(x)
-  return x, i #restituisce valore e posizione della scansione
 
+def McFind_argument(formula, i):
+    p_list=[]
+    if formula[i]=='-': #if it's a negation
+        [p_list, i]=MNnegation(formula, i) 
 
+    elif formula[i]=='(': 
+        [p_list, i]=MNsubformula(formula, i) #subformula computation
+
+    elif formula[i]=='0': 
+        p_list.append(linear_polynomials(0)) 
+        i=1
+
+    elif formula[i]=='1':
+        p_list.append(linear_polynomials(1)) 
+        x[0].cons_term=1
+        i=1
+
+    else:
+        [argument, i]=variable_name(formula, i)
+        x=linear_polynomials(0)
+        x.new_coef(argument, 1)
+        p_list.append(x)
+    
+    return p_list, i
+
+#base function for McNaughton's algoritm
 def McNaughton(formula):
-    lista=[]
     i=0
-    while(i<len(formula)): #fino alla fine della formula
-        if i==0:  #se ci troviamo all'inizio
-            if formula[0]=='-':
-                [lista, i]=MNnegazione(formula, 0) #risolve la negazione della prima sottoformula
-
-            elif formula[0]=='(': 
-                [lista, i]=MNsottoformula(formula, 0) #risolve la prima sottoformula
-
-            elif formula[0]=='0': 
-                lista.append(polinomio(0)) #pone la prima sottoformula pari a zero
-                i=1
-
-            elif formula[0]=='1':
-                lista.append(polinomio(1)) #pone la prima sottoformula pari ad 1
-                lista[0].tNoto=1
-                i=1
-
-            else:
-                [argomento, i]=riconoscimentoVariabile(formula, 0)
-                x=polinomio(0)
-                x.nuovo_coefficiente(argomento, 1)
-                lista.append(x)
-
+    while(i<len(formula)): #until we are at the end of the formula
+        if i==0:  #if we are at the start
+            [pol_list, i]=McFind_argument(formula, 0)
         else: 
-            y=[]
-            if formula[i+1]=='-':
-                [y, k]=MNnegazione(formula, i+1) #se si trova un segno di negazione, si da precedenza alla negazione
+            [y, k]=McFind_argument(formula, i+1)
 
-            elif formula[i+1]=='(':
-                [y, k]=MNsottoformula(formula, i+1) #si da precedenza alla sottoformula
-
-            elif formula[i+1]=='0':
-                y.append(polinomio(0))
-                k=i+2
-
-            elif formula[i+1]=='1':
-                y.append(polinomio(1))
-                y[0].tNoto=1
-                k=i+2
-
-            else:
-                [argomento, k]=riconoscimentoVariabile(formula, i+1)
-                y.append(polinomio(0))
-                y[0].nuovo_coefficiente(argomento, 1)
-                
-            #in base all'opezione data in input, si esegue l'operzione di Lukasiewicz adatta
+            #from Lukasiewicz's operation to polynomials operations
             if formula[i]=='&':
-                lista=generaPolinomi(lista, y, 1, 1, 0, -1)
+                pol_list=polynomials_generation(pol_list, y, 1, 1, 0, -1)
             elif formula[i]=='>':
-                lista=generaPolinomi(lista, y, -1, 1, 1, 1)
+                pol_list=polynomials_generation(pol_list, y, -1, 1, 1, 1)
             elif formula[i]=='+':
-                lista=generaPolinomi(lista, y, 1, 1, 1, 0)
+                pol_list=polynomials_generation(pol_list, y, 1, 1, 1, 0)
             elif formula[i]=='U':
-                lista=cambioSegno(lista)
-                lista=generaPolinomi(lista, y, 1, 1, 1, 0)
-                lista=cambioSegno(lista)
-                lista=generaPolinomi(lista, y, 1, 1, 1, 0)[1:]
+                pol_list=change_sign(pol_list)
+                pol_list=polynomials_generation(pol_list, y, 1, 1, 1, 0)
+                pol_list=change_sign(pol_list)
+                pol_list=polynomials_generation(pol_list, y, 1, 1, 1, 0)
             elif formula[i]=='^':
-                res=generaPolinomi(lista, y, -1, 1, 1, 1)
-                lista=generaPolinomi(lista, res, 1, 1, 0, -1)[1:]
+                res=polynomials_generation(pol_list, y, -1, 1, 1, 1)
+                pol_list=polynomials_generation(pol_list, res, 1, 1, 0, -1)
             
             elif formula[i]=='_':
-                y=cambioSegno(y)
-                lista=generaPolinomi(lista, y, 1, 1, 0, -1)
+                y=change_sign(y)
+                pol_list=polynomials_generation(pol_list, y, 1, 1, 0, -1)
             
             elif formula[i]=='=':
-                res1=generaPolinomi(lista, y, -1, 1, 1, 1)
-                res2=generaPolinomi(y, lista, -1, 1, 1, 1)
-                lista=generaPolinomi(res1, res2, 1, 1, 0, -1)
+                res1=polynomials_generation(pol_list, y, -1, 1, 1, 1)
+                res2=polynomials_generation(y, pol_list, -1, 1, 1, 1)
+                pol_list=polynomials_generation(res1, res2, 1, 1, 0, -1)
                 
-            i=k #il programma continua a scansionare
+            i=k 
 
-    return lista
-
-
-def stampa(polinomi):
-            
-    for i in range(len(polinomi)):
-        output=''
-        variabili=polinomi[i].coef
-        for k in range(len(variabili)):
-            if variabili[k].coefficiente>0:
-                if variabili[k].coefficiente!=1:
-                    output=output+'+'+str(variabili[k].coefficiente)+variabili[k].nome
-                else:
-                    output=output+'+'+variabili[k].nome
-                
-                if output[0]=='+':
-                    output=output[1:]
-
-            elif variabili[k].coefficiente<0:
-                if variabili[k].coefficiente!=-1:
-                    output=output+str(variabili[k].coefficiente)+variabili[k].nome
-                else:
-                    output=output+'-'+variabili[k].nome
-            
-        
-        if (polinomi[i].tNoto!=0) or (output==''):
-            if (polinomi[i].tNoto>0) and (output!=''):
-                output=output+'+'+str(polinomi[i].tNoto)    
-            else:    
-                output=output+str(polinomi[i].tNoto)
-
-        
-        stringa=' se '
-        do=polinomi[i].dominio
-        for k1 in range(len(do)):
-            dominio=''
-            variabili=do[k1].pol
-            for k2 in range(len(variabili)):
-                if variabili[k2].coefficiente>0:
-                    if variabili[k2].coefficiente!=1:
-                        dominio=dominio+'+'+str(variabili[k2].coefficiente)+variabili[k2].nome
-                    else:
-                        dominio=dominio+'+'+variabili[k2].nome
-                    
-                    if dominio[0]=='+':
-                        dominio=dominio[1:]
-
-                elif variabili[k2].coefficiente<0:
-                    if variabili[k2].coefficiente!=-1:
-                        dominio=dominio+str(variabili[k2].coefficiente)+variabili[k2].nome
-                    else:
-                        dominio=dominio+'-'+variabili[k2].nome
-            if do[k1].tNoto>0:
-                dominio=dominio+'+'+str(do[k1].tNoto)
-            else:
-                dominio=dominio+str(do[k1].tNoto)
-
-            dominio=dominio+do[k1].verso+str(do[k1].sec)+" "
-            stringa+=dominio        
-        polinomi[i]=output+stringa
-
-    return polinomi
+    return pol_list #return the list of all polynomials

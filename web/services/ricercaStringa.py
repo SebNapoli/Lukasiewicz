@@ -1,46 +1,48 @@
-def trovaParentesi(formula, j): #aperta una parentesi, trova in quale posizione viene chiusa
-  pila=['(']
+#file content: research fuctions
+
+def find_bracket(formula, j): #With an open bracket, find where it is closed
+  Bstack=['(']
   i=j+1
   while i<len(formula):
     if formula[i]=='(': 
-      pila.append('(') #se viene aperta una nouva parentesi, aggiungi un'elemento alla pila
+      Bstack.append('(') #if a new bracket is opened, add it in the stack
     elif formula[i]==')': 
-      pila.remove(pila[len(pila)-1]) #se viene chiusa una parentesi, rimuovila dalla pila
-      if len(pila)==0: #se non ci sono più parentesi "attive"
-        return i #restituzione della posizione chiusura parentesi
+      Bstack.remove(Bstack[len(Bstack)-1]) #if a bracket is closed, remove it from the stack
+      if len(Bstack)==0: #if there aren't open brackets
+        return i #return the position
     i+=1
   
-  return -1 #restituisce il valore -1 se esite qualche parentesi non chiusa
+  return -1 #return the -1 value if the bracket is not closed (error)
 
 
 
-def riconoscimentoVariabile(formula, i):
+def variable_name(formula, i): #return the variable name and scansion position
     j=i
     while j!=len(formula):
       if formula[j] in con:
         break
       else:
         j+=1
-    argomento=formula[i:j] #individua il nome della variabile
+    argument=formula[i:j] 
 
-    return argomento, j
+    return argument, j
 
 
-def aperturaParentesi(formula, j):
-  pila=[')']
+def open_bracket(formula, j):
+  Bstack=[')']
   i=j-1
   while i>0:
     if formula[i]==')': 
-      pila.append(')') #se viene aperta una nouva parentesi, aggiungi un'elemento alla pila
+      Bstack.append(')') 
     elif formula[i]=='(': 
-      pila.remove(pila[len(pila)-1]) #se viene chiusa una parentesi, rimuovila dalla pila
-      if len(pila)==0: #se non ci sono più parentesi "attive"
-        return i #restituzione della posizione chiusura parentesi
+      Bstack.remove(Bstack[len(Bstack)-1]) 
+      if len(Bstack)==0: 
+        return i 
     i-=1
 
   return i
 
-conn='&+_^U>=' #lista dei connettivi binari disponibili, in ordine di priorità
-costanti_logiche='01'
-aus='P*'
-con=conn+aus
+conn='&+_^U>=' 
+logic_con='01'
+aux='P*'
+con=conn+aux

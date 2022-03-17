@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Risultato
+            Results
         </title>
 
         <style>
@@ -69,12 +69,12 @@
 
     <body>
         <header>
-            Risultati ragionamento:
+            Results:
         </header>
 
         <article>
             <div>
-                <h4>Formule usate per codificare tabella: </h4> <br />
+                <h4>Coding formulas: </h4> <br />
                 <ul>
                     <id=formula>
                     {% for formula in formule %}
@@ -85,7 +85,7 @@
                 {% endfor %}
                 </ul>
                 {% if decisione!=None %}
-                <p>Interpetrazione in formula di Lukasiewicz della query: <br />
+                <p>Query interpretation as Lukasiewicz's formula: <br />
                     <id=formula>
                     {{decisione}}
                     </id>
@@ -98,7 +98,7 @@
             
             {% if output!=None %}
             <div class="output">
-                Si sono ottenuti i seguenti risultati:
+                The computing gave this results:
                     <ol>
                     {% for str in output %}
                     <li> {{str}} </li>
@@ -109,7 +109,7 @@
             
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
     

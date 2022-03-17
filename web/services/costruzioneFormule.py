@@ -1,19 +1,18 @@
-#file con le funzioni per la costruzione delle formule che codificano tabelle nel ragionamento vago
+#file content: formula construction for reasoning mode
 
-def Cformula(start, a, b, x): #algoritmo di mundici adattato per la codifica tabella, resa vera se e solo se x>=start
-    #per come è scritto il programma, sara a>0, b>0, |a|>=|b|
+def Cformula(start, a, b, x): #Mundici algoritm variation
 
-    if a+b==0: #si può dimostrare che se a+b=0 allora non esiste soluzione
+    if a+b==0: #
         return '0'
 
-    elif b==0: #se b=0, la formula cercata non è altro che
+    elif b==0: 
         if a==1: 
             return x
         else:
             f=str(a)+'*'+x
             return '('+f+')'
 
-    else: #costruzione della formula con un algoritmo simile a quello di Mundici (per ricorsione)
+    else: 
         f1=Cformula(start, a-1, b, x)
         if f1=='0':
             f1=x
@@ -29,7 +28,5 @@ def Cformula(start, a, b, x): #algoritmo di mundici adattato per la codifica tab
         return f1+f2
 
 
-#funzione per formule vere per x<=start
 def Cformula2(start, a, b, x): 
-  return Cformula(1-start, -a, b+a, '-'+x) #utilizzando l'ultimo punto del primo lemma articolo di McNaughton, si
-#può, attraverso alcune trasformazioni, ricondurre al caso precedente
+  return Cformula(1-start, -a, b+a, '-'+x)

@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Inserimento input
+            Enter input
         </title>
 
         <style>
@@ -55,26 +55,26 @@
         {% if errore %}
         <header class="errore">
             {% if ID=='IOError' %}
-            Errore! Inserito simbolo non nel linguaggio. Per favore, riprovare.
+            Warning! Not in language symbol found. Retry.
             
             {% elif ID=='IndentationError' %}
-            Errore! Trovata parentesi non chiusa. Per favore, riprovare
+            Warning! Not closed bracket found. Retry.
             
             {% elif ID=='SyntaxError' %}
-            Errore! Sintassi non corretta. Per favore, riprovare
+            Warning! Syntax error. Retry.
             
             {% elif ID=='ImportError' %}
-            Errore! Individuata variabile che inizia con un numero. Per favore, riprovare
+            Warning! A variable starting with a number was found. Retry.
                         
             {% else %}
-            Errore! Inserita formula vuota. Per favore, riprovare.
+            Warning! Empty formula found. Retry.
             
             {% endif %}
         </header>
 
         {% else %} 
         <header class="input">
-            Fase d'inserimento input
+            Input phase
         </header>        
 
         {% endif %} 
@@ -84,16 +84,16 @@
                 <form action="/conseguenza", method="POST">
                     
                     <div class="input">
-                        Inserire insieme (separare le formule con invio): <br />
+                        Enter set (split formulas with enter): <br />
                         <textarea name="insieme" cols="100"></textarea>                
                     </div>
                     
                     <div class="input">
-                        Inserire formula: <input type="text" name="formula" />
+                        Enter formula: <input type="text" name="formula" />
                     </div>
                     
                     <div class="tasto">
-                        <input type="submit" value="Conferma">
+                        <input type="submit" value="Confirm">
                     </div>
 
                 </form>    

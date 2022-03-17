@@ -1,109 +1,197 @@
+#flie content: list modification in McNaughton mode
 from z3 import *
-def elimina_inconsistenti(lista):
+
+#if the script finds a impossible domain, it will delete the associated polynomial
+def delete_impossible(pol_list):
     s=Solver()
-    for vinc in lista:
+    for vinc in pol_list:
+        #z3 setup for checking domain
         c=vinc.pol
         if len(c)>0:
             for j in range(len(c)):
                 if j==0:
-                    x=Real(c[j].nome)
+                    x=Real(c[j].name)
                     s.add(x>=0, x<=1)
-                    x=c[j].coefficiente*x
+                    x=c[j].coef_value*x
                 else:
-                    y=Real(c[j].nome)
+                    y=Real(c[j].name)
                     s.add(y>=0, y<=1)
-                    x=x+c[j].coefficiente*y
+                    x=x+c[j].coef_value*y
                                 
-            x=x+vinc.tNoto
-            if vinc.verso=='<=':
-                s.add(x<=vinc.sec)
-            elif vinc.verso=='>=':
-                s.add(x>=vinc.sec)
-            elif vinc.verso=='>':
-                s.add(x>vinc.sec)
-            elif vinc.verso=='<':
-                s.add(x<vinc.sec)
+            x=x+vinc.cons_term
+        else:
+            x=vinc.cons_term
+        
+        #sign setup
+        if vinc.verse=='<=':
+            s.add(x<=vinc.second_member)
+        elif vinc.verse=='>=':
+            s.add(x>=vinc.second_member)
+        elif vinc.verse=='>':
+            s.add(x>vinc.second_member)
+        elif vinc.verse=='<':
+            s.add(x<vinc.second_member)
 
-    if s.check()==unsat:
-        elimina=True
+    if s.check()==unsat: #if the domain is impossible
+        delete=True #delete the polynomial
     else:
-        elimina=False
+        delete=False
 
-    return elimina              
+    return delete              
 
-            
-def modificaLista(polinomi):
+#if the script finds a polynomial >1 or <0, it will be replaced with 1 or 0 
+def change_list(polynomials):
     s=Solver()
     t=Solver()
     i=0
-    while i<len(polinomi):
-        if False:
-            polinomi[0].dominio=["altrimenti"]
-
-        else:
-            s.push()
-            t.push()
-            c=polinomi[i].coef
-            if len(c)>0:
-                for j in range(len(c)):
-                    if j==0:
-                        x=Real(c[j].nome)
-                        s.add(x>=0, x<=1)
-                        t.add(x>=0, x<=1)
-                        x=c[j].coefficiente*x
-                    else:
-                        y=Real(c[j].nome)
-                        s.add(y>=0, y<=1)
-                        t.add(y>=0, y<=1)
-                        x=x+c[j].coefficiente*y
-                                
-                x=x+polinomi[i].tNoto
-                            
-
-                s.add(x>0)
-                s.check()
-                if s.check()==unsat:
-                    polinomi[i].coef=[]
-                    polinomi[i].tNoto=0
+    while i<len(polynomials):
+        #z3 setup
+        s.push()
+        t.push()
+        c=polynomials[i].coef
+        if len(c)>0:
+            for j in range(len(c)):
+                if j==0:
+                    x=Real(c[j].name)
+                    s.add(x>=0, x<=1)
+                    t.add(x>=0, x<=1)
+                    x=c[j].coef_value*x
                 else:
-                    t.add(x<1)
-                    if t.check()==unsat:
-                        polinomi[i].coef=[]
-                        polinomi[i].tNoto=1
-                s.pop()
-                t.pop()
+                    y=Real(c[j].name)
+                    s.add(y>=0, y<=1)
+                    t.add(y>=0, y<=1)
+                    x=x+c[j].coef_value*y
+                                
+            x=x+polynomials[i].cons_term
+        
+            s.add(x>0)
+            if s.check()==unsat: #if the polynomial is always <0
+                polynomials[i].coef=[]
+                polynomials[i].cons_term=0 #replace it with 0 constant
+            else:
+                t.add(x<1)
+                if t.check()==unsat: #if the polynomial is always >1
+                    polynomials[i].coef=[]
+                    polynomials[i].cons_term=1 #replace it with 0 constant
+            s.pop()
+            t.pop()
         
         i+=1
 
+
+    return polynomials #return the new list
+
+#The app will delete a polynomial if it's equal to another polynomial
+def delete_duplicates(polynomials):
     i=0
-
-    while i<len(polinomi):
+    while i<len(polynomials):
         j=i+1
-        c=True
-        while j<len(polinomi):
-            if len(polinomi[i].coef)==len(polinomi[j].coef):
-                ug=True
-                for k1 in range(len(polinomi[i].coef)):
-                    for k2 in range(len(polinomi[j].coef)):
-                        if polinomi[i].coef[k1].nome==polinomi[j].coef[k2].nome:
-                            if (polinomi[i].coef[k1].coefficiente)!=(polinomi[j].coef[k2].coefficiente):
-                                ug=False
-                                break
+        while j<len(polynomials):
+            if len(polynomials[i].coef)==len(polynomials[j].coef):
+                equality=True
+                for k in range(len(polynomials[i].coef)):
+                    if polynomials[i].coef[k].coef_value!=polynomials[j].coef[k].coef_value:
+                        equality=False
+                        break
                 
-                if ug:
-                    if polinomi[i].tNoto==polinomi[j].tNoto:
-                        c=False
-                        if polinomi[i].dominio==["altrimenti"] or polinomi[j].dominio==[] or polinomi[i].dominio==[]:
-                            polinomi.remove(polinomi[j])
-                        else:
-                            polinomi[j].dominio[0]='oppure se '+polinomi[j].dominio[0]
-                            polinomi[i].dominio=polinomi[i].dominio+polinomi[j].dominio
-                            polinomi.remove(polinomi[j])
-    
-            j+=1
-        if c:
-            i+=1
+                if equality: #if all coefficients are equals
+                    if polynomials[i].cons_term==polynomials[j].cons_term: #if the constant terms are equals too
+                        polynomials[i].al_domain.append(polynomials[j].domain)
+                        polynomials.remove(polynomials[j]) #remove the polynomial
+                    else:
+                        j+=1 #continue
+                
+                else:
+                    j+=1 #continue
+            
+            else:
+                j+=1 #continue
+            
+        i+=1
 
-#    polinomi=elDoppioni(polinomi)
-                
-    return polinomi
+    return polynomials #return the new list
+
+#delete useless constrains
+def useless_constrains(polynomials, List, lim, sign):
+    s=Solver()
+
+    c=polynomials.coef
+    if len(c)>0:
+        for j in range(len(c)):
+            if j==0:
+                x=Real(c[j].name)
+                s.add(x>=0, x<=1)
+                x=c[j].coef_value*x
+            else:
+                y=Real(c[j].name)
+                s.add(y>=0, y<=1)
+                x=x+c[j].coef_value*y
+                                
+        x=x+polynomials.cons_term
+    else:
+        x=polynomials.cons_term
+
+    if sign=='<=':
+        ul_cond=x<=lim
+    elif sign=='>=':
+        ul_cond=x>=lim
+    elif sign=='>':
+        ul_cond=x>lim
+    elif sign=='<':
+        ul_cond=x<lim    
+    
+    s.push()
+    s.add(ul_cond)    
+    if s.check()==unsat: 
+        return False, True
+    s.pop()
+
+    cond_pre=None
+    for vinc in List:
+        c=vinc.pol
+        if len(c)>0:
+            for j in range(len(c)):
+                if j==0:
+                    x=Real(c[j].name)
+                    s.add(x>=0, x<=1)
+                    x=c[j].coef_value*x
+                else:
+                    y=Real(c[j].name)
+                    s.add(y>=0, y<=1)
+                    x=x+c[j].coef_value*y
+                                
+            x=x+vinc.cons_term
+        else:
+            x=vinc.cons_term
+        
+        if cond_pre==None:
+            if vinc.verse=='<=':
+                cond_pre=x<=vinc.second_member
+            elif vinc.verse=='>=':
+                cond_pre=x>=vinc.second_member
+            elif vinc.verse=='>':
+                cond_pre=x>vinc.second_member
+            elif vinc.verse=='<':
+                cond_pre=x<vinc.second_member
+        else:
+            if vinc.verse=='<=':
+                cond_pre=And(cond_pre, x<=vinc.second_member)
+            elif vinc.verse=='>=':
+                cond_pre=And(cond_pre, x>=vinc.second_member)
+            elif vinc.verse=='>':
+                cond_pre=And(cond_pre, x>vinc.second_member)
+            elif vinc.verse=='<':
+                cond_pre=And(cond_pre, x<vinc.second_member)
+    if cond_pre!=None:
+        s.push()
+        s.add(And(cond_pre, Not(ul_cond)))
+        if s.check()==unsat:
+            return True, False
+        s.pop()
+
+        s.push()
+        s.add(And(Not(cond_pre), ul_cond))
+        if s.check()==unsat:
+            return False, True
+    
+    return False, False

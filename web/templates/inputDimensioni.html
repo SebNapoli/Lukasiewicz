@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Inserimento input
+            Input phase
         </title>
 
         <style>
@@ -54,30 +54,12 @@
     <body>
         {% if errore %}
         <header class="errore">
-            {% if ID=='ValueError' %}
-            Errore! Inserito simbolo non nel linguaggio. Per favore, riprovare.
-            
-            {% elif ID=='IndentationError' %}
-            Errore! Trovata parentesi non chiusa. Per favore, riprovare
-            
-            {% elif ID=='IOError' %}
-            Errore! Sintassi non corretta. Per favore, riprovare
-            
-            {% elif ID=='ImportError' %}
-            Errore! Individuata variabile che inizia con un numero. Per favore, riprovare
-            
-            {% elif ID=='KeyError' %} 
-            Errore! Inserito numero negativo. Per favore, riprovare.
-            
-            {% else %}
-            Errore! Inserita formula vuota. Per favore, riprovare.
-            
-            {% endif %}
+            Warning! One or more input not given. Retry.    
         </header>
 
         {% else %} 
         <header class="input">
-            Fase d'inserimento input
+            Input phase
         </header>        
 
         {% endif %} 
@@ -87,15 +69,15 @@
                 <form action="/ragionamento", method="POST">
                     
                     <div class="input">
-                        Inserire numero di oggetti: <input type="number" name="rig" min="1"/>
+                        Enter number of objects: <input type="number" name="rig" min="1"/>
                     </div>
 
                     <div class="input">
-                        Inserire numero di proprietà: <input type="number" name="col" min="1"/>
+                        Enter number of proprieties: <input type="number" name="col" min="1"/>
                     </div>
 
                     <div class="tasto">
-                        <input type="submit" value="Conferma" />
+                        <input type="submit" value="Confirm" />
                     </div>
 
                 </form>    

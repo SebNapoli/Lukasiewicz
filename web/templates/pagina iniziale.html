@@ -49,50 +49,34 @@
         </style>
         
         <title>
-            Risolutore logica di Lukasiewicz
+            Lukasiewicz's logic
         </title>
     </head>
 
     <body>
         <div>
             <header>
-                Risolutore logica di Lukasiewicz
+                Lukasiewicz's logic solver
             </header>
         </div>
 
 
         <article>
-            <section>
-            Scegliere l'opzione soddisfacibità per verificare che una formula sia soddisfacibile nella logica di Lukasiewicz
-            </section>
-            
-            <section>
-                Scegliere l'opzione conseguenza logica per verificare che una formula sia conseguenza logica di un insieme
-            </section>
-            
-            <section>
-                Scegliere l'opzione ragionamento vago per fare un ragionamento su una tabella di valori
-            </section>
-            
-            <section>
-                Scegliere aiuto per un chiarimento sul linguaggio e sulla priorità dei connettivi
-            </section>
-
             <div class="box">
                 <form action="/scelta" method="POST">
-                    Scegliere modalità app:
+                    Choose mode:
                     <ul>
-                        <li> <input type="radio" name="scelta" value="1" /> Soddisfacibità </li>
-                        <li> <input type="radio" name="scelta" value="2" /> Conseguenza Logica </li>
-                        <li> <input type="radio" name="scelta" value="3" /> Ragionamento vago (inserimento tabella) </li>
-                        <li> <input type="radio" name="scelta" value="4" /> Ragionamento vago (da database) </li>
-                        <li> <input type="radio" name="scelta" value="5" /> Codifica database </li>
+                        <li> <input type="radio" name="scelta" value="1" /> Satisfiability </li>
+                        <li> <input type="radio" name="scelta" value="2" /> Logic consequence </li>
+                        <li> <input type="radio" name="scelta" value="3" /> Vague reasoning (from input) </li>
+                        <li> <input type="radio" name="scelta" value="4" /> Vague reasoning (from database) </li>
+                        <li> <input type="radio" name="scelta" value="5" /> Database coding </li>
                         <li> <input type="radio" name="scelta" value="6" /> McNaughton </li>
-                        <li> <input type="radio" name="scelta" value="help" /> Aiuto </li>
+                        <li> <input type="radio" name="scelta" value="help" /> Help </li>
                     </ul>
                         
                     <div class="tasto">
-                        <input type="submit" value="Conferma scelta" />
+                        <input type="submit" value="Confirm" />
                     </div>
                 </form>
             </div>

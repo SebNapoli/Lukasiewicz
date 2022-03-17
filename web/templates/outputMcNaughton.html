@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Risultato
+            Results
         </title>
 
         <style>
@@ -43,42 +43,54 @@
             }
             
             div.output{
-                font-size: 40px;
-                font-family: 900;
                 margin-top: 1rem;
             }
-
+            
             ul{
                 margin-left: -11mm;
                 list-style-type: none;
             }
 
+            div.LP{
+                font-size: 40px;
+            }
+
+            div.D{
+                font-size: 20px;
+            }
         </style>
 
     </head>
 
     <body>
         <header>
-            Funzione di McNaughton:
+            McNaughton's function:
         </header>
 
         <article>
             <div class="debug">
-                Interpetrazione formula: <br />
+                Formula interpretation: <br />
                 {{formula}}
             </div>
     
             <div class="output">
-                <ul>
-                {% for stringa in polinomi %} 
-                    <li> {{stringa}} </li>
-                {% endfor %}
-                </ul>
+                    <ul>
+                        {% for i in range(N) %} 
+                        <li>
+                            <div class="LP"> {{output[i]}} </div>
+                            {% if domini[i]!="altrimenti" and domini[i]!="per qualsiasi assegnazione" %}
+                            <div class="D"> if {{domini[i]|safe}} </div> 
+                            {% else %} 
+                            <div class="D"> {{domini[i]}} </div>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
             </div>
 
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
     

@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Risultato
+            Results
         </title>
 
         <style>
@@ -74,27 +74,27 @@
 
     <body>
         <header>
-            Risultati soddisfacibilità della formula:
+            Satisfiability results:
         </header>
 
 
         {% if sodd %}
         <article class="T">
             <div class="debug">
-                Interpetrazione formula: <br />
+                Formula interpretation: <br />
                 {{formula}}
             </div>
     
             <div class="output">
-                La formula è soddisfacibile <br />
+                The formula is satisfiable <br />
     
                 {% if output!=None %}
-                Una possibile soluzione è data da {{output}}
+                A possible solution is {{output}}
                 {% endif %}
     
                 {% if alternative!=None %}
                 <div class="esempi">
-                    Soluzioni alternative:
+                    Other solutions:
                     <ul>
                         {% for soluzione in alternative %}
                             <li> {{soluzione}}</li>
@@ -106,7 +106,7 @@
 
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
     
@@ -115,17 +115,17 @@
         {% else %} 
         <article class="F">
             <div class="debug">
-                Interpetrazione formula: <br />
+                Formula interpretation: <br />
                 {{formula}}
             </div>
     
             <div class="output">
-                La formula non è soddisfacibile
+                The formula is not satisfiable
             </div>
 
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
     

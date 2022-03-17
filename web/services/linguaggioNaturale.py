@@ -1,50 +1,49 @@
-from services.scansioni import scansione
+from services.scansioni import scansion
 
-
-
-#trasformazione da linguaggio naturale a formula di Lucasiewicz
-def linguaggioNaturale(formula):
-    [sottoformule, u]=scansione(formula)
+#transformation for natural language to Lukasiewicz formulas
+def natural_language(formula):
+    subformulas=scansion(formula)[0]
 
     
-    for stringa in sottoformule:
-        if ("molto " in stringa) or ("abbastanza " in stringa):
-            formCostruita=stringa
+    for string in subformulas:
+        if ("very " in string) or ("quite " in string):
+            cons_formula=string
 
-            while formCostruita[0]==' ': #rimozione spazi inutili o segni di negazioni
-                formCostruita=formCostruita[1:]
+            while cons_formula[0]==' ': #remove useless spaces or negation signs
+                cons_formula=cons_formula[1:]
 
-            if formCostruita[0]=='-':
-                formCostruita='-'+linguaggioNaturale(formCostruita[1:])
+            if cons_formula[0]=='-':
+                cons_formula='-'+natural_language(cons_formula[1:])
 
-            elif formCostruita[0]=='(':
-                if formCostruita[len(formCostruita)-1]!=')': #se la parentesi non è chiusa si da messaggio di errore
+            elif cons_formula[0]=='(':
+                if cons_formula[len(cons_formula)-1]!=')': #error if the bracket is not closed
                     raise SyntaxError
                 
-                else: #altrimenti si eliminano le parentesi (al momento inutili)
-                    formCostruita='('+linguaggioNaturale(formCostruita[1:-1])+')'
+                else: 
+                    cons_formula='('+natural_language(cons_formula[1:-1])+')'
             
-            elif "molto "==formCostruita[:6]:
+            elif "very "==cons_formula[:5]:
                 count=0
-                while "molto "==formCostruita[:6]:
+                while "very "==cons_formula[:5]:
                     count+=1
-                    formCostruita=formCostruita[6:]
+                    cons_formula=cons_formula[5:]
                 
-                formCostruita='('+linguaggioNaturale(formCostruita)+'P'+str(count+1)+')'
+                cons_formula='('+natural_language(cons_formula)+'P'+str(count+1)+')'
+            #if n very are found, we see them as xPn
 
-            elif "abbastanza "==formCostruita[:11]:
+            elif "quite "==cons_formula[:6]:
                 count=0
-                while "abbastanza "==formCostruita[:11]:
+                while "quite "==cons_formula[:6]:
                     count+=1
-                    formCostruita=formCostruita[11:]
+                    cons_formula=cons_formula[6:]
                 
-                formCostruita='('+str(count+1)+'*'+linguaggioNaturale(formCostruita)+')'
-
-            else:
+                cons_formula='('+str(count+1)+'*'+natural_language(cons_formula)+')'
+            #if n quite are found, we see them as n*x
+            
+            else: #if a syntax error is found
                 raise SyntaxError
 
-            formula=formula.replace(stringa, formCostruita)
+            formula=formula.replace(string, cons_formula)
+            #replace the natural language with Lukasiewicz formulas
 
-
-    return formula                
-
+    return formula  #return the new formula

@@ -36,99 +36,99 @@
 
 
         <title>
-            Manuale
+            Help
         </title>
     </head>
 
     <body>
         <header>
-            Manuale
+            Help
         </header>
 
         <article>
 
             <section>
-                <h4>Finalita webapp</h4>
-                Questa webapp utilizza la logica di Lukasiewicz per diversi scopi
+                <h4> Webapp purpose </h4>
+                This webapp uses Lukasiewicz logic for several purposes
             </section>
 
             <section>
-                <h4>Modalita disponibili</h4>
-                L'app ha 5 modalità attualmente disponibili:
+                <h4> Available Modes </h4>
+                The app has 6 modes currently available:
                 <ol>
                     <li>
-                        Soddisfacibilità: data una formula di Lukasiewicz, permette di scoprire se questa è
-                        soddisfacibile oppure no, dandone, nel caso, anche un esempio. Vi è inoltre anche
-                        la possibiltà di verificare se esistono ulteriori soluzioni oltre a quella trovata
-                        in precedenza, in un numero deciso dall'utente
+                        Satisfiability: given a Lukasiewicz's formula, it finds out if this is
+                        satisfiable or not, giving, if necessary an example. There is
+                        the possibility of verifying if there are other solutions other the one found
+                        previously
                     </li>
 
                     <li>
-                        Conseguenza logica: dato un insieme di formule e un'ulteriore formula di Lukasiewicz,
-                        verifica se l'ultima è conseguenza logica delle altre. Supporta anche il caso con insieme
-                        vuoto di formule
+                        Logical consequence: given a set of formulas and a further Lukasiewicz's formula,
+                        verifies whether the latter is a logical consequence of the others. It also supports the case with 
+                        empty set
                     </li>
 
                     <li>
-                        Ragionamento vago da input: l'app, con una tabella data in input dall'utente, codifica
-                        la tabella normalizzata attraverso un insieme di formule di Lukasiewicz.
-                        Fatto ciò, a seconda della scelta dell'utente, può verificare se gli ottetti
-                        verificano o no quella query, o calcolare semplicemento quanto si avvicinano a verificare
-                        (il valore 1 indiche la condizione è stata verificata) <br />
-                        In questa modalità è previsto anche l'uso delle parole chiave "molto" e "poco".
-                        Il funzionamento di queste parole chiave è spiegato come segue: <br />
-                        MOLTO: <br />
-                        molto a equivalente a dire aP2 <br />
-                        molto molto a: equivalente a dire aP3 <br />
-                        e cosi via <br />
-                        ABBASTANZA: <br />
-                        abbastanza a: equivalente a dire 2*a <br />
-                        poco poco a: equivalente a dire 3*a <br />
-                        e cosi via
-
+                        Vague reasoning (from input): the app, with a table given as input by the user, codes
+                        the normalized table with a set of Lukasiewicz's formulas.
+                        Once this is done, depending on the user's choice, he can check if the objects
+                        verify that query or not, or simply calculate how close they come to verify
+                        (the value 1 indicates the condition has been verified) <br />
+                        In this mode, the use of the keywords "very" and "quite " is possible, too.
+                        The operation of these keywords is explained as follows: <br />
+                        VERY: <br />
+                        very a: equivalent to saying aP2 <br />
+                        very very a: equivalent to saying aP3 <br />
+                        and so on <br />
+                        QUITE: <br />
+                        QUITE a: equivalent to saying 2*a <br />
+                        QUITE QUITE a: equivalent to saying 3 * a <br />
+                        and so on
                     </li>
 
                     <li>
-                        Ragionamento vago da database: come sopra, ma l'utente seleziona un file txt in formato CVD
-                        dove si trovano tutti i dati da analizzare
+                        Vague reasoning (from database): as before, but the user gives a txt file: a database in CSV format                    
                     </li>
 		
-			<li>
-			Codifica database: da la codifica della tabella normalizzata attraverso le formule di Lukasiewicz
-			da un database in formato CVD
-			</li>
+                    <li>
+                        Database coding: the qpp gives the coding of the normalized table through Lukasiewicz's formulas
+                        from a database in CSV format
+                    </li>
                 </ol>
             </section>
 
             <section>
-                <h4>Simboli del linguaggio disponibili</h4>
-                Di seguito è riportata la lista di tutti i connettivi che è possibile usare all'interno del risolutore (in ordine di priorità)
+                <h4> Language symbols available </h4>
+                The list of all the connectives that can be used within the solver (in order of priority) is as follows:
             
                 <ol>
-                    <li>-p: negazione (valore di verità: 1-p) </li>
-                    <li>p&q: congiunzione forte (valore di verità: max{0, p+q-1}) </li>
-                    <li>p+q: disgiunzione forte (valore di verità: min{1, p+q}) </li>
-                    <li>p_q: differenza troncata (equivalente ad p&(-q)) </li>
-                    <li>p^q: congiunzione debole (valore di verità: min{p, q}) </li>
-                    <li>pUq: disgiunzione debole (valore di verità: max{p, q}) </li>
-                    <li>p>q: implicazione (valore di verità: min{1, 1-p+q}) </li>
-                    <li>p=q: doppia implicazione (equivalente ad (p>q)&(q>p)) </li>
+                    <li> -p: negation (truth value: 1-p) </li>
+                    <li> p & q: strong conjunction (truth value: max {0, p + q-1}) </li>
+                    <li> p + q: strong disjunction (truth value: min {1, p + q}) </li>
+                    <li> p_q: truncated difference (equivalent to p & (- q)) </li>
+                    <li> p ^ q: weak conjunction (truth value: min {p, q}) </li>
+                    <li> pUq: weak disjunction (truth value: max {p, q}) </li>
+                    <li> p> q: implication (truth value: min {1, 1-p + q}) </li>
+                    <li> p = q: double implication (equivalent to (p> q) & (q> p)) </li>
                 </ol>
                 
-                Possibile è anche l'utilizzo delle costanti logiche 0 e 1 per indicare l'assurdo e la tautologia.
-                Inoltre, si è esteso il linguaggio aggiungendo la potenza e la moltiplicazione per un numero, definiti in questo modo:
+                It is possible to use the logical constants 0 and 1, too.
+                The language is extended by adding the power and multiplication, defined like this:
                 <ol>
-                    <li>pPn: a&a&...&a n volte</li>
-                    <li>n*p: a+a+...+a n volte</li>
+                    <li> pPn: a & a & ... & a n times </li>
+                    <li> n * p: a + a + ... + a n times </li>
                 </ol>
-                La priorità di questi connettivi ausiliari è data dall'ordine della lista. Questi hanno anche priorità rispetto a
-                qualsiasi connettivo logico
+                The priority of these auxiliary connectives is given by the order of the list. These also have priority over
+                any logical connective
+
+
     
             </section>
             
             <div class="tasto">
                 <form action="/">
-                    <input type="submit" value="Tornare alla pagina iniziale" />
+                    <input type="submit" value="Go back to home page" />
                 </form>
             </div>
         

@@ -1,34 +1,35 @@
-#file per tutte le operazioni logiche
+#file content: Lukasiewicz functions
+
 from z3 import *
 
-def minimo(p, q): #calcola il minimo fra due variabili proposizionali
+def Luk_min(p, q): #the app finds the min between two propositional variables 
   if ((type(p)==int or type(p)==float) and (type(q)==int or type(q)==float)):
     return min(p, q)
   else:
     return If(p<=q, p, q)
 
 
-def massimo(p, q): #calcola il massimo fra due variabili proposizionali
+def Luk_max(p, q): #the app finds the max between two propositional variables
   if ((type(p)==int or type(p)==float) and (type(q)==int or type(q)==float)):
     return max(p, q)
   else:
     return If(p>=q, p, q)
 
 
-def tnorm(p, q): #t-norma, funzione di verità della congiunzione forte (valore numerico max{p+q-1, 0})
-  return massimo(p+q-1, 0)
+def tnorm(p, q): #t-norm, truth value of strong conjuction (max{p+q-1, 0})
+  return Luk_max(p+q-1, 0)
 
-def residuo(p, q): #calcolo residuo, funzione di verità dell'implicazione (valore numerico min{q-p+1, 1})
-  return minimo(-p+q+1, 1)
+def residuum(p, q): #residuum, truth value of implication (min{q-p+1, 1})
+  return Luk_min(-p+q+1, 1)
 
-def compl(p): #calcolo valore di verità implicazione
+def compl(p): #truth value of negation
   return 1-p
 
-def sommat(p, q): #calcolo valore di verità disgiunzione forte (valore numerico min{p+q, 1})
-  return minimo(p+q, 1)
+def t_sum(p, q): #truth value strong disj (min{p+q, 1})
+  return Luk_min(p+q, 1)
 
-def doppiaimp(p, q): #calcolo valore di verità doppia implicazione
-  return tnorm(residuo(p, q), residuo(q, p))
+def double_imp(p, q): 
+  return tnorm(residuum(p, q), residuum(q, p))
 
-def difft(p, q): #calcolo differenza troncata
+def t_diff(p, q):
   return tnorm(p, compl(q))
