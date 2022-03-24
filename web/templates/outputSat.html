@@ -24,16 +24,25 @@
                 font-weight: 200;
             }
 
-            article{
+            article.T{
                 margin-right: auto;
                 margin-left: auto;
                 width: fit-content;
                 padding: 15mm;
                 border-radius: 5mm;
-                border: 5px solid blue;
+                border: 5px solid green;
                 background-color: white;
             }
 
+            article.F{
+                margin-right: auto;
+                margin-left: auto;
+                width: fit-content;
+                padding: 15mm;
+                border-radius: 5mm;
+                border: 5px solid red;
+                background-color: white;
+            }
 
             div.button{
                 margin-top: 1rem;
@@ -43,49 +52,56 @@
             }
             
             div.output{
+                font-size: 40px;
+                font-family: 900;
                 margin-top: 1rem;
             }
-            
+
+            div.esempi{
+                font-size: 15px;
+                font-weight: 200;
+                margin-top: 1rem;
+            }
+
             ul{
                 margin-left: -11mm;
                 list-style-type: none;
             }
 
-            div.LP{
-                font-size: 40px;
-            }
-
-            div.D{
-                font-size: 20px;
-            }
         </style>
 
     </head>
 
     <body>
         <header>
-            McNaughton's function:
+            Satisfiability results:
         </header>
 
-        <article>
+
+        {% if sodd %}
+        <article class="T">
             <div class="debug">
                 Formula interpretation: <br />
                 {{formula}}
             </div>
     
             <div class="output">
+                The formula is satisfiable <br />
+    
+                {% if output!=None %}
+                A possible solution is {{output}}
+                {% endif %}
+    
+                {% if alternative!=None %}
+                <div class="esempi">
+                    Other solutions:
                     <ul>
-                        {% for i in range(N) %} 
-                        <li>
-                            <div class="LP"> {{output[i]}} </div>
-                            {% if domains[i]!="otherwise" and domains[i]!="everywhere" %}
-                            <div class="D"> if {{domains[i]|safe}} </div> 
-                            {% else %} 
-                            <div class="D"> {{domains[i]}} </div>
-                            {% endif %}
-                        </li>
+                        {% for soluzione in alternative %}
+                            <li> {{soluzione}}</li>
                         {% endfor %}
                     </ul>
+                    {% endif %}    
+                </div>
             </div>
 
             <div class="button">
@@ -96,5 +112,24 @@
     
         </article>
 
+        {% else %} 
+        <article class="F">
+            <div class="debug">
+                Formula interpretation: <br />
+                {{formula}}
+            </div>
+    
+            <div class="output">
+                The formula is not satisfiable
+            </div>
+
+            <div class="button">
+                <form action="/">
+                    <input type="submit" value="Go back to home page" />
+                </form>
+            </div>
+    
+        </article>
+        {% endif %}
     </body>
 </html>

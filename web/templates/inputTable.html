@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Enter input
+            Dimensions
         </title>
 
         <style>
@@ -85,36 +85,57 @@
         <header class="input">
             Input phase
         </header>        
-        {% endif %}
-        
+
+        {% endif %} 
+
         <article>
             <div class="box">
-                <form action="/database", method="POST">
-                    <div class="input">
-                        File: <input type="file" name="database" />
-                    </div>
+                <form action="/table", method="POST">
+                    <table border="1">
+                        {% for i in range(row) %} 
+                        <tr>
+                            {% if i==0 %} 
+                                <td>name propriety</td>
+                                
+                                {% for j in range(col) %}  
+                                    <td> <input type="text" name="propriety{{j}}" value="propriety{{j}}"> </td>
+                                {% endfor %}
+                            
+                            {% else %} 
+                                <td> <input type="text" name="name{{i}}" value="Object {{i}}"/> </td>
+        
+                                {% for j in range(col) %}  
+                                    <td> <input type="number" name="entry{{i}}{{j}}"> </td>
+                                {% endfor %} 
+        
+                            {% endif %}
+                            
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td> Best choice: </td>
+                            {% for j in range(col) %} 
+                                <td> <input type="radio" name="choice{{j}}" value="max"> Max <input type="radio" name="choice{{j}}" value="min"> Min </td> 
+                            {% endfor %}
+                        </tr>    
+                    </table>
                     
-                    {% if query %}
                     <div class="input">
                         Enter query: <input type="text" name="condition" /> <br />
                         <p>
-                        Choose mode:
-                        <ul>
-                            <li> <input type="radio" name="mode" value="1" /> Satisfiability </li>
-                            <li> <input type="radio" name="mode" value="2" /> Truth value </li>
-                        </ul>
+                            Choose mode:
+                            <ul>
+                                <li> <input type="radio" name="mode" value="1" /> Satisfiability </li>
+                                <li> <input type="radio" name="mode" value="2" /> Truth value </li>
+                            </ul>
                         </p>
                     </div>
-                    {% endif %}
                     Enter precision ("inf" for exact computing): 1/ <input type="text" name="den" />
-
+                    
                     <div class="button">
                         <input type="submit" value="Confirm">
                     </div>
-
-                </form>    
-            </div>
-
+                </form>
         </article>
     </body>
 

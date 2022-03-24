@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Enter input
+            Input phase
         </title>
 
         <style>
@@ -54,23 +54,7 @@
     <body>
         {% if Error %}
         <header class="Error">
-            {% if ID=='IOError' %}
-            Warning! Not in language symbol found. Retry.
-            
-            {% elif ID=='IndentationError' %}
-            Warning! Not closed bracket found. Retry.
-            
-            {% elif ID=='SyntaxError' %}
-            Warning! Syntax error. Retry.
-            
-            {% elif ID=='ImportError' %}
-            Warning! A variable starting with a number was found. Retry.
-                        
-            {% else %}
-            Warning! Empty formula found. Retry.
-            
-            {% endif %}
-
+            Warning! One or more input not given. Retry.    
         </header>
 
         {% else %} 
@@ -82,15 +66,20 @@
 
         <article>
             <div class="box">
-                <form action="/McNaughton", method="POST">
+                <form action="/Reasoning", method="POST">
                     
                     <div class="input">
-                        Enter formula: <input type="text" name="formula" /> 
+                        Enter number of objects: <input type="number" name="row" min="1"/>
                     </div>
-                    
+
+                    <div class="input">
+                        Enter number of proprieties: <input type="number" name="col" min="1"/>
+                    </div>
+
                     <div class="button">
-                        <input type="submit" value="Conferma">
+                        <input type="submit" value="Confirm" />
                     </div>
+
                 </form>    
             </div>
 

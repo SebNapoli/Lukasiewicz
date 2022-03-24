@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style>
+            html{
+                font-family: Arial, Helvetica, sans-serif;
+                background-color: cornflowerblue;
+            }
+            
+            header{
+                font-size: 50px;
+                font-weight: bold;
+                text-align: center;
+                padding-bottom: 15mm;
+            }
+
+            article{
+                margin-right: auto;
+                margin-left: auto;
+                width: 50%;
+                padding: 15mm;
+                border-radius: 5mm;
+                border: 5px solid blue;
+                background-color: white;
+            }
+
+            div.button{
+                padding-top: 2mm;
+                width: fit-content;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+        </style>
+
+
+        <title>
+            Help
+        </title>
+    </head>
+
+    <body>
+        <header>
+            Help
+        </header>
+
+        <article>
+
+            <section>
+                <h4> Webapp purpose </h4>
+                This webapp uses Lukasiewicz logic for several purposes
+            </section>
+
+            <section>
+                <h4> Available Modes </h4>
+                The app has 6 modes currently available:
+                <ol>
+                    <li>
+                        Satisfiability: given a Lukasiewicz's formula, it finds out if this is
+                        satisfiable or not, giving, if necessary an example. There is
+                        the possibility of verifying if there are other solutions other the one found
+                        previously
+                    </li>
+
+                    <li>
+                        Logical consequence: given a set of formulas and a further Lukasiewicz's formula,
+                        verifies whether the latter is a logical consequence of the others. It also supports the case with 
+                        empty set
+                    </li>
+
+                    <li>
+                        Vague reasoning (from input): the app, with a table given as input by the user, codes
+                        the normalized table with a set of Lukasiewicz's formulas.
+                        Once this is done, depending on the user's choice, he can check if the objects
+                        verify that query or not, or simply calculate how close they come to verify
+                        (the value 1 indicates the condition has been verified) <br />
+                        In this mode, the use of the keywords "very" and "quite " is possible, too.
+                        The operation of these keywords is explained as follows: <br />
+                        VERY: <br />
+                        very a: equivalent to saying aP2 <br />
+                        very very a: equivalent to saying aP3 <br />
+                        and so on <br />
+                        QUITE: <br />
+                        quite a: equivalent to saying 2*a <br />
+                        quite quite a: equivalent to saying 3 * a <br />
+                        and so on
+                    </li>
+
+                    <li>
+                        Vague reasoning (from database): as before, but the user gives a txt file: a database in CSV format                    
+                    </li>
+		
+                    <li>
+                        Database coding: the qpp gives the coding of the normalized table through Lukasiewicz's formulas
+                        from a database in CSV format
+                    </li>
+
+                    <li>
+                        McNaughton: the compute the McNaughton fuction that is the truth fuction of the given formula 
+                    </li>
+                </ol>
+            </section>
+
+            <section>
+                <h4> Language symbols available </h4>
+                The list of all the connectives that can be used within the solver (in order of priority) is as follows:
+            
+                <ol>
+                    <li> -p: negation (truth value: 1-p) </li>
+                    <li> p & q: strong conjunction (truth value: max {0, p + q-1}) </li>
+                    <li> p + q: strong disjunction (truth value: min {1, p + q}) </li>
+                    <li> p_q: truncated difference (equivalent to p & (- q)) </li>
+                    <li> p ^ q: weak conjunction (truth value: min {p, q}) </li>
+                    <li> pUq: weak disjunction (truth value: max {p, q}) </li>
+                    <li> p> q: implication (truth value: min {1, 1-p + q}) </li>
+                    <li> p = q: double implication (equivalent to (p> q) & (q> p)) </li>
+                </ol>
+                
+                It is possible to use the logical constants 0 and 1, too.
+                The language is extended by adding the power and multiplication, defined like this:
+                <ol>
+                    <li> pPn: a & a & ... & a n times </li>
+                    <li> n * p: a + a + ... + a n times </li>
+                </ol>
+                The priority of these auxiliary connectives is given by the order of the list. These also have priority over
+                any logical connective
+
+
+    
+            </section>
+            
+            <div class="button">
+                <form action="/">
+                    <input type="submit" value="Go back to home page" />
+                </form>
+            </div>
+        
+        </article>
+
+
+    </body>
+</html>

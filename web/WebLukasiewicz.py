@@ -1,15 +1,17 @@
 #importing libraries
-from secrets import choice
 from z3 import *
 from flask import Flask, render_template, request
-from services.scansioni import *
-from services.debug import *
-from services.risoluzione import *
-from services.ricercaStringa import *
-from services.ragionamento import *
-from services.scansioneIniziale import *
-from services.McNaughton import *
-from services.printMcNaughton import *
+from services.Search_and_debug.start_scansion import *
+from services.Search_and_debug.debug import *
+from services.Resolutions.create_variables import *
+from services.Resolutions.resolution import *
+from services.Resolutions.alt_solutions import *
+from services.Search_and_debug.search_on_string import *
+from services.Vague_Reasoning.reasoning import *
+from services.Vague_Reasoning.formulas_construction import *
+from services.Vague_Reasoning.check_on_reasoning import *
+from services.McNaughton_mode.McNaughton import *
+from services.McNaughton_mode.print_McNaughton import *
 
 #calling Flash library for HTML treatment
 app=Flask(__name__)
@@ -17,53 +19,52 @@ app=Flask(__name__)
 #This function prints the home page of the web-app
 @app.route("/")
 def home_page():
-  return render_template("pagina iniziale.html") #calls the HTML file for the starting choice
-
+  return render_template("home page.html") #calls the HTML file for the starting choice
 
 
 #This function chooses the right mode wanted by the user
-@app.route("/scelta", methods=["GET", "POST"])
+@app.route("/choice", methods=["GET", "POST"])
 def choose_mode():
   if request.method=="GET": #Error message if the user get here from the URL
-    return "<h1> ERRORE! </h1>"
+    return "<h1> Error! </h1>"
   
   if request.method=="POST":
     try:
-      choice=request.form["scelta"] #The scripts gets user's input
+      choice=request.form["choice"] #The scripts gets user's input
       if choice=='help':
-        return render_template("aiuto.html") #It prints the manual in HTML format
+        return render_template("help.html") #It prints the manual in HTML format
 
       #If not help, choose the mode and prints the right HTML file
       elif choice=='1':
-        return render_template("inputSoddisfacibilità.html", errore=False, ID=None)
+        return render_template("inputSat.html", Error=False, ID=None)
 
       elif choice=='2':
-        return render_template("inputConseguenza.html", errore=False, ID=None)
+        return render_template("inputConsequence.html", Error=False, ID=None)
 
       elif choice=='3':
-        return render_template("inputDimensioni.html", errore=False)
+        return render_template("inputDimension.html", Error=False)
 
       elif choice=='4':
-        return render_template("inputDatabase.html", errore=False, ID=None, query=True)
+        return render_template("inputDatabase.html", Error=False, ID=None, query=True)
 
       elif choice=='5':
-        return render_template("inputDatabase.html", errore=False, ID=None, query=False)
+        return render_template("inputDatabase.html", Error=False, ID=None, query=False)
 
       elif choice=='6':
-        return render_template("inputMcNaughton.html", errore=False, ID=None)
+        return render_template("inputMcNaughton.html", Error=False, ID=None)
     
     except: #if no option was selected
-      return render_template("pagina iniziale.html") #print the home page again
+      return render_template("home page.html") #print the home page again
 
 
 
 
 #Web app in satisfability mode
-@app.route("/soddisfacibilita", methods=["GET", "POST"])
+@app.route("/sat", methods=["GET", "POST"])
 
 def satisfability(): 
   if request.method=="GET":
-    return "<p> ERRORE </p>"
+    return "<p> Error </p>"
   
   if request.method=="POST":  
     s=Solver()
@@ -73,7 +74,7 @@ def satisfability():
       N=int(request.form["N"]) #input number of alternative solutions
     
     except: #Print a error message if no number was given
-      return render_template("inputSoddisfacibilità.html", errore=True, ID="KeyError")
+      return render_template("inputSat.html", Error=True, ID="KeyError")
     
 
     formula=formula.replace(' ', '') #delete useless spaces
@@ -96,38 +97,38 @@ def satisfability():
         if len(var)>0: #if there are some variables, the app can give a model
           model=s.model() 
           alternative=alternatives(model, var, N, s) #for other solutions
-          return render_template("outputSoddisfacibilità.html", formula=formula, alternative=alternative, output=str(model)[1:-1], sodd=True)
+          return render_template("outputSat.html", formula=formula, alternative=alternative, output=str(model)[1:-1], sodd=True)
                 
         else: #if there are only logical constants, the app can't give a model
-          return render_template("outputSoddisfacibilità.html", formula=formula, alternative=None, output=None, sodd=True)
+          return render_template("outputSat.html", formula=formula, alternative=None, output=None, sodd=True)
           
       else: #if the formula is not satisfable
-        return render_template("outputSoddisfacibilità.html", formula=formula, alternative=None, output=None, sodd=False)
+        return render_template("outputSat.html", formula=formula, alternative=None, output=None, sodd=False)
 
     #Error treatment    
     except NotImplementedError:
-      return render_template("inputSoddisfacibilità.html", errore=True, ID='IOError')
+      return render_template("inputSat.html", Error=True, ID='IOError')
     except IndentationError:
-      return render_template("inputSoddisfacibilità.html", errore=True, ID='IndentationError')
+      return render_template("inputSat.html", Error=True, ID='IndentationError')
     except SyntaxError:
-      return render_template("inputSoddisfacibilità.html", errore=True, ID='SyntaxError')
+      return render_template("inputSat.html", Error=True, ID='SyntaxError')
     except ImportError:
-      return render_template("inputSoddisfacibilità.html", errore=True, ID='ImportError')      
+      return render_template("inputSat.html", Error=True, ID='ImportError')      
     except:
-      return render_template("inputSoddisfacibilità.html", errore=True, ID='NoFormula')
+      return render_template("inputSat.html", Error=True, ID='NoFormula')
 
 
 #Web app in logic consequence mode
-@app.route("/conseguenza", methods=["GET", "POST"])
+@app.route("/Consequence", methods=["GET", "POST"])
 def consequence():
 
   if request.method=="GET":
-    return "<p> ERRORE </p>"
+    return "<p> Error </p>"
   
   if request.method=="POST":  
     try: #if there isn't an error
       s=Solver()
-      set=request.form["insieme"].split("\n") #split the input string every time it founds a newline
+      set=request.form["set"].split("\n") #split the input string every time it founds a newline
       for i in range(len(set)): 
         set[i]=set[i].replace('\r', '')
         set[i]=set[i].replace(' ', '')
@@ -180,16 +181,16 @@ def consequence():
           
         if s.check()==unsat: #if the condition is not satisfable (see as the formula is logic consequence)
           result="The formula is logic consequence"
-          return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula ,risultato=result, controesempio=None)
+          return render_template("outputConsequence.html", interpetration=interpretation, formula=formula ,result=result, counterexample=None)
             
         else: #if the formula isn't logic consequence
           if (len(var)+len(varN))>0: #if there is at least one variable, the app can provide a counterexample
             result="The formula isn't logic consequence. "
             counterexample= "A possible counterexample: "+str(s.model())[1:-1]
-            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=counterexample)
+            return render_template("outputConsequence.html", interpetration=interpretation, formula=formula, result=result, counterexample=counterexample)
           else:
             result="the formula isn't logic consequence."
-            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=None)
+            return render_template("outputConsequence.html", interpetration=interpretation, formula=formula, result=result, counterexample=None)
 
       else: #if the set is empty
         var=create_variables(new_formula, s)
@@ -200,55 +201,55 @@ def consequence():
 
         if s.check()==unsat: #if the condition is not satisfable
           result="The formula is logic consequence"
-          return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=None)
+          return render_template("outputConsequence.html", interpetration=interpretation, formula=formula, result=result, counterexample=None)
             
         else: 
           if (len(var))>0: #if there is at least one variable, the app can provide a counterexample
             result="The formula is not logic consequence."
             counterexample= "A possible counterexample: "+str(s.model())[1:-1]
-            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=counterexample)
+            return render_template("outputConsequence.html", interpetration=interpretation, formula=formula, result=result, counterexample=counterexample)
             
           else:
             result="The formula is not logic consequence."
-            return render_template("outputConseguenza.html", interpetrazione=interpretation, formula=formula, risultato=result, controesempio=None)          
+            return render_template("outputConsequence.html", interpetration=interpretation, formula=formula, result=result, counterexample=None)          
 
     #errors treatment
     except NotImplementedError:
-      return render_template("inputConseguenza.html", errore=True, ID='IOError')
+      return render_template("inputConsequence.html", Error=True, ID='IOError')
     except IndentationError:
-      return render_template("inputConseguenza.html", errore=True, ID='IndentationError')
+      return render_template("inputConsequence.html", Error=True, ID='IndentationError')
     except SyntaxError:
-      return render_template("inputConseguenza.html", errore=True, ID='SyntaxError')
+      return render_template("inputConsequence.html", Error=True, ID='SyntaxError')
     except ImportError:
-      return render_template("inputConseguenza.html", errore=True, ID='ImportError')      
+      return render_template("inputConsequence.html", Error=True, ID='ImportError')      
     except:
-      return render_template("inputConseguenza.html", errore=True, ID="NoFormula")
+      return render_template("inputConsequence.html", Error=True, ID="NoFormula")
       
 
 #Web app in reasoning mode (from user's input): get table dimensions
-@app.route("/ragionamento", methods=["GET", "POST"])
+@app.route("/Reasoning", methods=["GET", "POST"])
 def dimensions():
   if request.method=="GET":
-    return "<p> ERRORE </p>"
+    return "<p> Error </p>"
   
   if request.method=="POST":
     try:
-      r=int(request.form["rig"])
+      r=int(request.form["row"])
       col=int(request.form["col"])
       row=r+1
-      return render_template("inputTabella.html", errore=False, ID=None, rig=row, col=col)
+      return render_template("inputtable.html", Error=False, row=row, col=col)
     
     except: #if at least one form is empty, give an error message
-      return render_template("inputDimensioni.html", errore=True)
+      return render_template("inputDimension.html", Error=True)
 
 
 
 #Web app in reasoning mode (from user's input)
-@app.route("/tabella", methods=["GET", "POST"])
+@app.route("/table", methods=["GET", "POST"])
 def reasoning():
 
   if request.method=="GET":
-    return "<p> ERRORE </p>"
+    return "<p> Error </p>"
   
   if request.method=="POST":
     tab=list(request.form) #returns all box names
@@ -265,27 +266,27 @@ def reasoning():
       for i in range(len(tab)): #split the input 
         x=request.form[tab[i]] 
 
-        if "proprieta" in tab[i]:
+        if "propriety" in tab[i]:
           col+=1
           property.append(x)
 
-        elif "nome" in tab[i]:
+        elif "name" in tab[i]:
           row+=1
           objects.append(x)
           
-        elif "entrata" in tab[i]:
+        elif "entry" in tab[i]:
           List.append(x)
           
-        elif "scelta" in tab[i]:
+        elif "choice" in tab[i]:
           comparison.append(x)
 
-        elif "condizione" in tab[i]:
+        elif "condition" in tab[i]:
           query=x
 
         elif "den" in tab[i]:
           den=x
         
-        elif "modalita" in tab[i]:
+        elif "mode" in tab[i]:
           mode=x
 
       for i in range(row): #put numerical values in the table and 
@@ -295,26 +296,26 @@ def reasoning():
 
       [formulas, query, output]=Rea(row, col, property, objects, table, comparison, query, den, mode)
 
-      return render_template("outputRagionamento.html", formule=formulas, decisione=query, output=output)
+      return render_template("outputReasoning.html", formulas=formulas, Decision=query, output=output)
     
     except NameError:
-      return render_template("inputTabella.html", errore=True, ID="NameError", rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID="NameError", row=row+1, col=col)
     except PermissionError:
-      return render_template("inputTabella.html", errore=True, ID="PermissionError", rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID="PermissionError", row=row+1, col=col)
     except ArgumentError:
-      return render_template("inputTabella.html", errore=True, ID="ArgumentError", rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID="ArgumentError", row=row+1, col=col)
     except TypeError:
-      return render_template("inputTabella.html", errore=True, ID="TypeError", rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID="TypeError", row=row+1, col=col)
     except NotImplementedError:
-      return render_template("inputTabella.html", errore=True, ID='IOError', rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID='IOError', row=row+1, col=col)
     except IndentationError:
-      return render_template("inputTabella.html", errore=True, ID='IndentationError', rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID='IndentationError', row=row+1, col=col)
     except SyntaxError:
-      return render_template("inputTabella.html", errore=True, ID='SyntaxError', rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID='SyntaxError', row=row+1, col=col)
     except ImportError:
-      return render_template("inputTabella.html", errore=True, ID='ImportError', rig=row+1, col=col)      
+      return render_template("inputtable.html", Error=True, ID='ImportError', row=row+1, col=col)      
     except: #almeno uno dei campi è vuoto
-      return render_template("inputTabella.html", errore=True, ID="KeyError", rig=row+1, col=col)
+      return render_template("inputtable.html", Error=True, ID="KeyError", row=row+1, col=col)
 
 
 #Web app in database mode
@@ -322,10 +323,10 @@ def reasoning():
 def database():
 
   if request.method=="GET":
-      return "<p> ERRORE </p>"
+      return "<p> Error </p>"
     
   if request.method=="POST":
-    if "condizione" in list(request.form): #if it's in reasoning from databale mode
+    if "condition" in list(request.form): #if it's in reasoning from databale mode
       query=True
     else:
       query=False
@@ -364,50 +365,50 @@ def database():
 
         
         if query: #if the app is in reasoning mode
-          decision=request.form["condizione"]
-          mode=request.form["modalita"]
-          #chiamata della funzione principale del ragionamento
-          [formule, decisione, output]=Rea(row, col, property, objects, table, comparison, decision, den, mode)
+          decision=request.form["condition"]
+          mode=request.form["mode"]
+          #calling main Reasoning fuction
+          [formulas, Decision, output]=Rea(row, col, property, objects, table, comparison, decision, den, mode)
 
         else: #if the app is in table coding mode
           var_name=[]
           par_control(property, objects, row, col)
-          #crea il nome di tutte le varibili logiche, definite come nome proprietà più il codice dell'oggetto
+          
           for i in range(row):
             var_name.append([])
             for j in range(col):
               var_name[i].append(property[j]+str(i+1))
 
-          formule=formulas_construction(table, var_name, comparison, row, col, den)
-          decisione=output=None
+          formulas=formulas_construction(table, var_name, comparison, row, col, den)
+          Decision=output=None
 
-        return render_template("outputRagionamento.html", formule=formule, decisione=decisione, output=output)
+        return render_template("outputReasoning.html", formulas=formulas, Decision=Decision, output=output)
         
     except NameError:
-      return render_template("inputDatabase.html", errore=True, ID="NameError", query=query)
+      return render_template("inputDatabase.html", Error=True, ID="NameError", query=query)
     except PermissionError:
-      return render_template("inputDatabase.html", errore=True, ID="PermissionError", query=query)
+      return render_template("inputDatabase.html", Error=True, ID="PermissionError", query=query)
     except ArgumentError:
-      return render_template("inputDatabase.html", errore=True, ID="ArgumentError", query=query)
+      return render_template("inputDatabase.html", Error=True, ID="ArgumentError", query=query)
     except TypeError:
-      return render_template("inputDatabase.html", errore=True, ID="TypeError", query=query)
+      return render_template("inputDatabase.html", Error=True, ID="TypeError", query=query)
     except NotImplementedError:
-      return render_template("inputDatabase.html", errore=True, ID='IOError', query=query)
+      return render_template("inputDatabase.html", Error=True, ID='IOError', query=query)
     except IndentationError:
-      return render_template("inputDatabase.html", errore=True, ID='IndentationError', query=query)
+      return render_template("inputDatabase.html", Error=True, ID='IndentationError', query=query)
     except SyntaxError:
-      return render_template("inputDatabase.html", errore=True, ID='SyntaxError', query=query)
+      return render_template("inputDatabase.html", Error=True, ID='SyntaxError', query=query)
     except ImportError:
-      return render_template("inputDatabase.html", errore=True, ID='ImportError', query=query)      
+      return render_template("inputDatabase.html", Error=True, ID='ImportError', query=query)      
     except:
-      return render_template("inputDatabase.html", errore=True, ID="KeyError", query=query)
+      return render_template("inputDatabase.html", Error=True, ID="KeyError", query=query)
 
 
 #Web app in McNaughton function computing mode
 @app.route("/McNaughton", methods=["GET", "POST"])
 def McN():
   if request.method=="GET":
-    return "<p> ERRORE </p>"
+    return "<p> Error </p>"
   
   if request.method=="POST":  
     try:
@@ -421,15 +422,15 @@ def McN():
       function=McNaughton(new_formula) #McNaughton function computing 
       #output treatment
       [output, domains]=pol_print(function) 
-      return render_template("outputMcNaughton.html", formula=formula, output=output, domini=domains, N=len(output))
+      return render_template("outputMcNaughton.html", formula=formula, output=output, domains=domains, N=len(output))
         
     except NotImplementedError:
-      return render_template("inputMcNaughton.html", errore=True, ID='IOError')
+      return render_template("inputMcNaughton.html", Error=True, ID='IOError')
     except IndentationError:
-      return render_template("inputMcNaughton.html", errore=True, ID='IndentationError')
+      return render_template("inputMcNaughton.html", Error=True, ID='IndentationError')
     except SyntaxError:
-      return render_template("inputMcNaughton.html", errore=True, ID='SyntaxError')
+      return render_template("inputMcNaughton.html", Error=True, ID='SyntaxError')
     except ImportError:
-      return render_template("inputMcNaughton.html", errore=True, ID='ImportError')      
+      return render_template("inputMcNaughton.html", Error=True, ID='ImportError')      
     except:
-      return render_template("inputMcNaughton.html", errore=True, ID='NoFormula')
+      return render_template("inputMcNaughton.html", Error=True, ID='NoFormula')
