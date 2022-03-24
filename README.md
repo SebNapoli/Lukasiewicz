@@ -3,6 +3,6 @@ Web app Lukasiewicz
 
 
 Last update:
-English language available \n
-McNaughton bugs fixed \n
-Minor bugs fixed \n
+English language available,
+McNaughton bugs fixed,
+Minor bugs fixed.
