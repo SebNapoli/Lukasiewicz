@@ -35,6 +35,14 @@ class linear_polynomials:
 
             if i+1==len(self.coef):
                 self.coef.append(temp)
+                
+    def check_coef(self):
+        i=0
+        while i<len(self.coef):
+            if self.coef[i].coef_value==0:
+                self.coef.remove(self.coef[i])
+            else:
+                i+=1
 
     def new_cond(self, coefficients, t, lim, sign): #add a new condition in the domain
         self.domain.append(constrains(coefficients, t, lim, sign))
