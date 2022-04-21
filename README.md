@@ -2,7 +2,5 @@
 Web app Lukasiewicz
 
 
-Last update:
-English language available,
-McNaughton bugs fixed,
-Minor bugs fixed.
+Last update (21/04/2022):
+Duplicates bug fixed
