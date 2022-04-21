@@ -83,6 +83,10 @@ def change_list(polynomials):
 
 #The app will delete a polynomial if it's equal to another polynomial
 def delete_duplicates(polynomials):
+
+    for i in range(len(polynomials)):
+        polynomials[i].check_coef()
+
     i=0
     while i<len(polynomials):
         j=i+1
